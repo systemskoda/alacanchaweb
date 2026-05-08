@@ -107,11 +107,15 @@ function Home() {
         <div className="mx-auto max-w-6xl">
           <SectionTitle eyebrow="Acompañan" title="Sponsors" />
           {(() => {
-            const list = sponsors.length ? sponsors : Array.from({ length: 6 }).map((_, i) => ({ id: `ph-${i}`, name: "", image_url: "" }) as Sponsor);
-            const loop = [...list, ...list];
+            const base = sponsors.length ? sponsors : Array.from({ length: 6 }).map((_, i) => ({ id: `ph-${i}`, name: "", image_url: "" }) as Sponsor);
+            // Ensure one "set" has enough items to fill the viewport so the loop has no gap
+            const minPerSet = 8;
+            const repeats = Math.max(1, Math.ceil(minPerSet / base.length));
+            const set = Array.from({ length: repeats }).flatMap(() => base);
+            const loop = [...set, ...set];
             return (
               <div className="mt-10 overflow-hidden select-none pointer-events-none" aria-hidden={false}>
-                <div className="flex gap-6 animate-marquee">
+                <div className="flex gap-6 animate-marquee w-max">
                   {loop.map((s, idx) => (
                     <div key={`${s.id}-${idx}`} className="flex h-40 w-64 shrink-0 items-center justify-center rounded-xl border-2 border-border bg-card p-6 shadow-sm">
                       {s.image_url ? (
