@@ -14,7 +14,108 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      articles: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          published_at: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          published_at?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          published_at?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      audios: {
+        Row: {
+          audio_url: string
+          created_at: string
+          description: string
+          id: string
+          published_at: string | null
+          title: string
+        }
+        Insert: {
+          audio_url: string
+          created_at?: string
+          description?: string
+          id?: string
+          published_at?: string | null
+          title: string
+        }
+        Update: {
+          audio_url?: string
+          created_at?: string
+          description?: string
+          id?: string
+          published_at?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      images: {
+        Row: {
+          created_at: string
+          filename: string
+          id: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          filename: string
+          id?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          filename?: string
+          id?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      sponsors: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          image_url: string
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          image_url: string
+          name?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          image_url?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
