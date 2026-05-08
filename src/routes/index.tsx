@@ -106,19 +106,25 @@ function Home() {
       <section id="sponsors" className="px-4 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl">
           <SectionTitle eyebrow="Acompañan" title="Sponsors" />
-          <div className="mt-10 overflow-x-auto">
-            <div className="flex gap-6 pb-4">
-              {(sponsors.length ? sponsors : Array.from({ length: 6 }).map((_, i) => ({ id: `ph-${i}`, name: "", image_url: "" }) as Sponsor)).map((s) => (
-                <div key={s.id} className="flex h-28 w-44 shrink-0 items-center justify-center rounded-xl border-2 border-border bg-card p-4 shadow-sm">
-                  {s.image_url ? (
-                    <img src={s.image_url} alt={s.name} className="max-h-full max-w-full object-contain" />
-                  ) : (
-                    <Trophy className="h-10 w-10 text-muted-foreground/30" />
-                  )}
+          {(() => {
+            const list = sponsors.length ? sponsors : Array.from({ length: 6 }).map((_, i) => ({ id: `ph-${i}`, name: "", image_url: "" }) as Sponsor);
+            const loop = [...list, ...list];
+            return (
+              <div className="mt-10 overflow-hidden select-none pointer-events-none" aria-hidden={false}>
+                <div className="flex gap-6 animate-marquee">
+                  {loop.map((s, idx) => (
+                    <div key={`${s.id}-${idx}`} className="flex h-28 w-44 shrink-0 items-center justify-center rounded-xl border-2 border-border bg-card p-4 shadow-sm">
+                      {s.image_url ? (
+                        <img src={s.image_url} alt={s.name} className="max-h-full max-w-full object-contain" draggable={false} />
+                      ) : (
+                        <Trophy className="h-10 w-10 text-muted-foreground/30" />
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            );
+          })()}
         </div>
       </section>
 
