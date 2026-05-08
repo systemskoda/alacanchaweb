@@ -8,17 +8,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { FileText, Mic, Image as ImgIcon, Trophy, LogOut, Plus, Pencil, Trash2, Radio } from "lucide-react";
+import { Mic, Image as ImgIcon, Trophy, LogOut, Plus, Pencil, Trash2, Radio } from "lucide-react";
 
 export const Route = createFileRoute("/admin/dashboard")({
   component: Dashboard,
 });
 
-type Tab = "notas" | "audios" | "sponsors" | "images";
+type Tab = "audios" | "sponsors" | "images";
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("notas");
+  const [tab, setTab] = useState<Tab>("audios");
 
   const logout = async () => {
     await supabase.auth.signOut();
@@ -26,8 +26,7 @@ function Dashboard() {
   };
 
   const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { id: "notas", label: "Notas", icon: FileText },
-    { id: "audios", label: "Audios", icon: Mic },
+    { id: "audios", label: "Notas", icon: Mic },
     { id: "sponsors", label: "Sponsors", icon: Trophy },
     { id: "images", label: "Imágenes", icon: ImgIcon },
   ];
@@ -71,7 +70,6 @@ function Dashboard() {
       </div>
 
       <main className="flex-1 p-6 pb-24 md:p-10">
-        {tab === "notas" && <NotasPanel />}
         {tab === "audios" && <AudiosPanel />}
         {tab === "sponsors" && <SponsorsPanel />}
         {tab === "images" && <ImagesPanel />}
@@ -86,124 +84,6 @@ function PanelHeader({ title, action }: { title: string; action?: React.ReactNod
       <h1 className="font-display text-3xl font-bold uppercase text-primary">{title}</h1>
       {action}
     </div>
-  );
-}
-
-/* ---------------- NOTAS ---------------- */
-type Article = { id: string; title: string; content: string; image_url: string | null; status: string; published_at: string | null };
-
-function NotasPanel() {
-  const [items, setItems] = useState<Article[]>([]);
-  const [images, setImages] = useState<{ id: string; url: string; filename: string }[]>([]);
-  const [editing, setEditing] = useState<Article | null>(null);
-  const [open, setOpen] = useState(false);
-
-  const load = async () => {
-    const { data } = await supabase.from("articles").select("*").order("created_at", { ascending: false });
-    setItems(data ?? []);
-  };
-  useEffect(() => {
-    load();
-    supabase.from("images").select("*").order("created_at", { ascending: false }).then(({ data }) => setImages(data ?? []));
-  }, []);
-
-  const save = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const payload = {
-      title: String(fd.get("title")),
-      content: String(fd.get("content")),
-      image_url: (fd.get("image_url") as string) || null,
-      status: String(fd.get("status")),
-      published_at: fd.get("published_at") ? new Date(String(fd.get("published_at"))).toISOString() : new Date().toISOString(),
-    };
-    const { error } = editing
-      ? await supabase.from("articles").update(payload).eq("id", editing.id)
-      : await supabase.from("articles").insert(payload);
-    if (error) return toast.error(error.message);
-    toast.success("Nota guardada");
-    setOpen(false); setEditing(null); load();
-  };
-
-  const remove = async (id: string) => {
-    if (!confirm("¿Eliminar esta nota?")) return;
-    const { error } = await supabase.from("articles").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Eliminada"); load();
-  };
-
-  return (
-    <>
-      <PanelHeader title="Notas" action={
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setEditing(null)} className="bg-primary hover:bg-primary-bright">
-              <Plus className="mr-2 h-4 w-4" /> Nueva nota
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader><DialogTitle>{editing ? "Editar nota" : "Nueva nota"}</DialogTitle></DialogHeader>
-            <form onSubmit={save} className="space-y-4">
-              <div><Label>Título</Label><Input name="title" required defaultValue={editing?.title} /></div>
-              <div><Label>Contenido</Label><Textarea name="content" rows={8} required defaultValue={editing?.content} /></div>
-              <div>
-                <Label>Imagen</Label>
-                <Select name="image_url" defaultValue={editing?.image_url ?? "none"}>
-                  <SelectTrigger><SelectValue placeholder="Seleccionar imagen" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Sin imagen</SelectItem>
-                    {images.map((i) => <SelectItem key={i.id} value={i.url}>{i.filename}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Estado</Label>
-                  <Select name="status" defaultValue={editing?.status ?? "draft"}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="published">Publicada</SelectItem>
-                      <SelectItem value="draft">Borrador</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Fecha</Label>
-                  <Input type="datetime-local" name="published_at" defaultValue={editing?.published_at?.slice(0, 16) ?? new Date().toISOString().slice(0, 16)} />
-                </div>
-              </div>
-              <DialogFooter><Button type="submit" className="bg-primary">Guardar</Button></DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      } />
-
-      <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="bg-secondary text-left font-display uppercase tracking-wider text-xs text-muted-foreground">
-            <tr><th className="p-4">Título</th><th className="p-4">Fecha</th><th className="p-4">Estado</th><th className="p-4 text-right">Acciones</th></tr>
-          </thead>
-          <tbody>
-            {items.length === 0 && <tr><td colSpan={4} className="p-8 text-center text-muted-foreground">Sin notas todavía</td></tr>}
-            {items.map((a) => (
-              <tr key={a.id} className="border-t">
-                <td className="p-4 font-medium">{a.title}</td>
-                <td className="p-4 text-muted-foreground">{a.published_at ? new Date(a.published_at).toLocaleDateString("es-AR") : "—"}</td>
-                <td className="p-4">
-                  <span className={`rounded-full px-2 py-1 text-xs font-semibold ${a.status === "published" ? "bg-primary-bright/15 text-primary-bright" : "bg-muted text-muted-foreground"}`}>
-                    {a.status === "published" ? "Publicada" : "Borrador"}
-                  </span>
-                </td>
-                <td className="p-4 text-right">
-                  <Button size="sm" variant="ghost" onClick={() => { setEditing(a); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
-                  <Button size="sm" variant="ghost" onClick={() => remove(a.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
   );
 }
 
@@ -265,15 +145,15 @@ function AudiosPanel() {
 
   return (
     <>
-      <PanelHeader title="Audios" action={
+      <PanelHeader title="Notas" action={
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
           <DialogTrigger asChild>
             <Button onClick={() => setEditing(null)} className="bg-primary hover:bg-primary-bright">
-              <Plus className="mr-2 h-4 w-4" /> Nuevo audio
+              <Plus className="mr-2 h-4 w-4" /> Nueva nota
             </Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>{editing ? "Editar audio" : "Nuevo audio"}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{editing ? "Editar nota" : "Nueva nota"}</DialogTitle></DialogHeader>
             <form onSubmit={save} className="space-y-4">
               <div><Label>Título</Label><Input name="title" required defaultValue={editing?.title} /></div>
               <div><Label>Descripción</Label><Textarea name="description" rows={4} defaultValue={editing?.description} /></div>
