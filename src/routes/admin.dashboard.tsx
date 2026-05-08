@@ -145,15 +145,15 @@ function AudiosPanel() {
 
   return (
     <>
-      <PanelHeader title="Audios" action={
+      <PanelHeader title="Notas" action={
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
           <DialogTrigger asChild>
             <Button onClick={() => setEditing(null)} className="bg-primary hover:bg-primary-bright">
-              <Plus className="mr-2 h-4 w-4" /> Nuevo audio
+              <Plus className="mr-2 h-4 w-4" /> Nueva nota
             </Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>{editing ? "Editar audio" : "Nuevo audio"}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{editing ? "Editar nota" : "Nueva nota"}</DialogTitle></DialogHeader>
             <form onSubmit={save} className="space-y-4">
               <div><Label>Título</Label><Input name="title" required defaultValue={editing?.title} /></div>
               <div><Label>Descripción</Label><Textarea name="description" rows={4} defaultValue={editing?.description} /></div>
