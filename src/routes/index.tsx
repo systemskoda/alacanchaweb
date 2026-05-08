@@ -27,10 +27,10 @@ function Home() {
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
 
   useEffect(() => {
-    supabase.from("audios").select("*").order("published_at", { ascending: false }).limit(4).then(({ data }) => {
+    supabase.from("audios").select("*").order("published_at", { ascending: false }).limit(3).then(({ data }) => {
       const list = data ?? [];
       setLatestAudio(list[0] ?? null);
-      setAudios(list.slice(1, 4));
+      setAudios(list);
     });
     supabase.from("sponsors").select("*").eq("active", true).order("created_at", { ascending: false }).then(({ data }) => setSponsors(data ?? []));
   }, []);
@@ -113,7 +113,7 @@ function Home() {
               <div className="mt-10 overflow-hidden select-none pointer-events-none" aria-hidden={false}>
                 <div className="flex gap-6 animate-marquee">
                   {loop.map((s, idx) => (
-                    <div key={`${s.id}-${idx}`} className="flex h-28 w-44 shrink-0 items-center justify-center rounded-xl border-2 border-border bg-card p-4 shadow-sm">
+                    <div key={`${s.id}-${idx}`} className="flex h-40 w-64 shrink-0 items-center justify-center rounded-xl border-2 border-border bg-card p-6 shadow-sm">
                       {s.image_url ? (
                         <img src={s.image_url} alt={s.name} className="max-h-full max-w-full object-contain" draggable={false} />
                       ) : (
