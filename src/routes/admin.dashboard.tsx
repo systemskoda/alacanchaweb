@@ -8,17 +8,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { FileText, Mic, Image as ImgIcon, Trophy, LogOut, Plus, Pencil, Trash2, Radio } from "lucide-react";
+import { Mic, Image as ImgIcon, Trophy, LogOut, Plus, Pencil, Trash2, Radio } from "lucide-react";
 
 export const Route = createFileRoute("/admin/dashboard")({
   component: Dashboard,
 });
 
-type Tab = "notas" | "audios" | "sponsors" | "images";
+type Tab = "audios" | "sponsors" | "images";
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("notas");
+  const [tab, setTab] = useState<Tab>("audios");
 
   const logout = async () => {
     await supabase.auth.signOut();
@@ -26,8 +26,7 @@ function Dashboard() {
   };
 
   const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { id: "notas", label: "Notas", icon: FileText },
-    { id: "audios", label: "Audios", icon: Mic },
+    { id: "audios", label: "Notas", icon: Mic },
     { id: "sponsors", label: "Sponsors", icon: Trophy },
     { id: "images", label: "Imágenes", icon: ImgIcon },
   ];
