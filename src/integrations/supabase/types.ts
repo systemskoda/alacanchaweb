@@ -14,36 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      articles: {
-        Row: {
-          content: string
-          created_at: string
-          id: string
-          image_url: string | null
-          published_at: string | null
-          status: string
-          title: string
-        }
-        Insert: {
-          content?: string
-          created_at?: string
-          id?: string
-          image_url?: string | null
-          published_at?: string | null
-          status?: string
-          title: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          image_url?: string | null
-          published_at?: string | null
-          status?: string
-          title?: string
-        }
-        Relationships: []
-      }
       audios: {
         Row: {
           audio_url: string
