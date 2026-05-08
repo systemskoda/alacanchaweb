@@ -134,4 +134,13 @@
 
   .text-gold { color: var(--color-gold); }
   .bg-gold { background-color: var(--color-gold); color: var(--color-gold-foreground); }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .animate-marquee {
+    animation: marquee 40s linear infinite;
+    width: max-content;
+  }
 }
