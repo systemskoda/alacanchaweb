@@ -41,6 +41,27 @@ export type Database = {
         }
         Relationships: []
       }
+      guests: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          name?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          name?: string
+        }
+        Relationships: []
+      }
       images: {
         Row: {
           created_at: string
@@ -59,6 +80,39 @@ export type Database = {
           filename?: string
           id?: string
           url?: string
+        }
+        Relationships: []
+      }
+      matches: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          description: string
+          id: string
+          is_match_of_day: boolean
+          match_date: string | null
+          stream_url: string | null
+          title: string
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          is_match_of_day?: boolean
+          match_date?: string | null
+          stream_url?: string | null
+          title: string
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          is_match_of_day?: boolean
+          match_date?: string | null
+          stream_url?: string | null
+          title?: string
         }
         Relationships: []
       }
