@@ -14,6 +14,7 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { Button } from "@/components/ui/button";
 import heroBg from "@/assets/hero-stadium.jpg";
+import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -78,6 +79,7 @@ function Home() {
           {/* Columna 1: Título + Última Nota */}
           <div className="flex flex-col gap-6">
             <div className="text-center lg:text-left">
+              <img src={logo} alt="A la Cancha" className="mx-auto lg:mx-0 mb-6 h-28 w-28 object-contain drop-shadow-2xl" />
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/40 bg-black/20 px-4 py-1.5 text-xs uppercase tracking-widest text-gold backdrop-blur">
                 <Radio className="h-3.5 w-3.5" /> En vivo · 97.9 FM
               </div>
