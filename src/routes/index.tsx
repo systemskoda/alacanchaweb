@@ -10,7 +10,7 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-type Audio = { id: string; title: string; description: string; audio_url: string; published_at: string | null };
+type Audio = { id: string; title: string; description: string; audio_url: string; published_at: string | null; is_featured?: boolean };
 type Sponsor = { id: string; name: string; image_url: string };
 type Match = { id: string; title: string; description: string; cover_image_url: string | null; stream_url: string | null; match_date: string | null };
 type Guest = { id: string; name: string; image_url: string };
