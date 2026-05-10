@@ -73,7 +73,9 @@ function Dashboard() {
 
       <main className="flex-1 p-6 pb-24 md:p-10">
         {tab === "audios" && <AudiosPanel />}
+        {tab === "matches" && <MatchesPanel />}
         {tab === "sponsors" && <SponsorsPanel />}
+        {tab === "guests" && <GuestsPanel />}
         {tab === "images" && <ImagesPanel />}
       </main>
     </div>
