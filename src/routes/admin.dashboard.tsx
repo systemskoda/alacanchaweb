@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Mic, Image as ImgIcon, Trophy, LogOut, Plus, Pencil, Trash2, Radio } from "lucide-react";
+import { Mic, Image as ImgIcon, Trophy, LogOut, Plus, Pencil, Trash2, Radio, Tv, Star, Users } from "lucide-react";
 
 export const Route = createFileRoute("/admin/dashboard")({
   component: Dashboard,
