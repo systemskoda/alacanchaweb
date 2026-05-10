@@ -295,13 +295,15 @@ function Home() {
               <span>www.fmaltos.com.ar</span>
             </a>
           </div>
-          <div className="mt-10 flex justify-center gap-3">
+          <div className="mt-10 flex flex-wrap justify-center gap-3">
             {[
-              { icon: Instagram, label: "Instagram" },
-              { icon: Facebook, label: "Facebook" },
-              { icon: MessageCircle, label: "WhatsApp" },
+              { icon: Instagram, label: "Instagram", href: "#" },
+              { icon: Facebook, label: "Facebook", href: "#" },
+              { icon: MessageCircle, label: "WhatsApp", href: "#" },
+              { icon: Twitch, label: "Twitch", href: TWITCH_URL },
+              { icon: Youtube, label: "YouTube", href: YOUTUBE_URL },
             ].map((s) => (
-              <a key={s.label} href="#" aria-label={s.label} className="grid h-12 w-12 place-items-center rounded-full border border-white/30 bg-white/10 transition hover:bg-gold hover:text-gold-foreground">
+              <a key={s.label} href={s.href} target={s.href.startsWith("http") ? "_blank" : undefined} rel="noreferrer" aria-label={s.label} className="grid h-12 w-12 place-items-center rounded-full border border-white/30 bg-white/10 transition hover:bg-gold hover:text-gold-foreground">
                 <s.icon className="h-5 w-5" />
               </a>
             ))}
