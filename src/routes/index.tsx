@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Radio, Calendar, Mic, Trophy, Instagram, Facebook, MessageCircle, MapPin, Clock, Globe, ArrowRight } from "lucide-react";
+import { Radio, Calendar, Mic, Trophy, Instagram, Facebook, MessageCircle, MapPin, Clock, Globe, ArrowRight, Twitch, Youtube, Tv } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
@@ -12,6 +12,11 @@ export const Route = createFileRoute("/")({
 
 type Audio = { id: string; title: string; description: string; audio_url: string; published_at: string | null };
 type Sponsor = { id: string; name: string; image_url: string };
+type Match = { id: string; title: string; description: string; cover_image_url: string | null; stream_url: string | null; match_date: string | null };
+type Guest = { id: string; name: string; image_url: string };
+
+const TWITCH_URL = "https://www.twitch.tv/radioaltos979";
+const YOUTUBE_URL = "https://www.youtube.com/@ALACANCHARADIO";
 
 const team = [
   { name: "Fabián Rodríguez", role: "Conductor" },
@@ -25,6 +30,8 @@ function Home() {
   const [audios, setAudios] = useState<Audio[]>([]);
   const [latestAudio, setLatestAudio] = useState<Audio | null>(null);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [matchOfDay, setMatchOfDay] = useState<Match | null>(null);
+  const [guests, setGuests] = useState<Guest[]>([]);
 
   useEffect(() => {
     supabase.from("audios").select("*").order("published_at", { ascending: false }).limit(3).then(({ data }) => {
@@ -33,6 +40,8 @@ function Home() {
       setAudios(list);
     });
     supabase.from("sponsors").select("*").eq("active", true).order("created_at", { ascending: false }).then(({ data }) => setSponsors(data ?? []));
+    supabase.from("matches").select("*").eq("is_match_of_day", true).order("created_at", { ascending: false }).limit(1).then(({ data }) => setMatchOfDay(data?.[0] ?? null));
+    supabase.from("guests").select("*").order("created_at", { ascending: false }).then(({ data }) => setGuests(data ?? []));
   }, []);
 
   const scroll = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -42,43 +51,42 @@ function Home() {
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-pitch relative flex min-h-[calc(100vh-4rem)] items-center justify-center overflow-hidden px-4 py-20 text-primary-foreground">
-        <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-10 lg:grid-cols-[1.2fr_1fr]">
-          <div className="text-center lg:text-left">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/40 bg-black/20 px-4 py-1.5 text-xs uppercase tracking-widest text-gold backdrop-blur">
+      <section className="bg-pitch relative overflow-hidden px-4 py-16 text-primary-foreground sm:py-20">
+        <div className="relative z-10 mx-auto grid w-full max-w-7xl items-stretch gap-8 lg:grid-cols-3">
+          {/* a) Brand */}
+          <div className="text-center lg:text-left flex flex-col justify-center">
+            <div className="mb-6 inline-flex self-center lg:self-start items-center gap-2 rounded-full border border-gold/40 bg-black/20 px-4 py-1.5 text-xs uppercase tracking-widest text-gold backdrop-blur">
               <Radio className="h-3.5 w-3.5" /> En vivo · 97.9 FM
             </div>
-            <h1 className="font-display text-6xl font-bold leading-none tracking-tight text-balance sm:text-7xl md:text-8xl">
+            <h1 className="font-display text-5xl font-bold leading-none tracking-tight text-balance sm:text-6xl">
               A LA <span className="text-gold">CANCHA</span>
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-white/85 sm:text-xl lg:mx-0 mx-auto">
+            <p className="mt-6 max-w-xl text-base text-white/85 sm:text-lg lg:mx-0 mx-auto">
               Programa integral de deportes donde la información y los protagonistas cobran voz.
             </p>
-            <div className="mt-8 inline-flex flex-wrap items-center gap-2 rounded-lg border border-white/15 bg-black/30 px-5 py-3 text-sm backdrop-blur">
+            <div className="mt-6 inline-flex self-center lg:self-start flex-wrap items-center gap-2 rounded-lg border border-white/15 bg-black/30 px-4 py-2.5 text-sm backdrop-blur">
               <Radio className="h-4 w-4 text-gold" />
-              <span className="font-semibold">Radio Altos Bahía Blanca 97.9</span>
+              <span className="font-semibold">Radio Altos 97.9</span>
               <span className="opacity-60">·</span>
               <span>Lun a Vie 19 a 21hs</span>
             </div>
             <a href={RADIO_WEB} target="_blank" rel="noreferrer" className="mt-3 flex items-center justify-center lg:justify-start gap-2 text-sm text-gold hover:underline">
               <Globe className="h-4 w-4" /> www.fmaltos.com.ar
             </a>
-            <div className="mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
-              <Button size="lg" onClick={() => scroll("notas")} className="bg-gold text-gold-foreground hover:bg-gold/90 font-display uppercase tracking-wider">
-                Ver Notas
-              </Button>
-              <a href={RADIO_WEB} target="_blank" rel="noreferrer">
-                <Button size="lg" variant="outline" className="border-white/40 bg-transparent text-white hover:bg-white/10 font-display uppercase tracking-wider">
-                  Radio Altos
-                </Button>
+            <div className="mt-5 flex justify-center lg:justify-start gap-2">
+              <a href={TWITCH_URL} target="_blank" rel="noreferrer" aria-label="Twitch" className="grid h-10 w-10 place-items-center rounded-full border border-white/30 bg-white/10 transition hover:bg-gold hover:text-gold-foreground">
+                <Twitch className="h-5 w-5" />
+              </a>
+              <a href={YOUTUBE_URL} target="_blank" rel="noreferrer" aria-label="YouTube" className="grid h-10 w-10 place-items-center rounded-full border border-white/30 bg-white/10 transition hover:bg-gold hover:text-gold-foreground">
+                <Youtube className="h-5 w-5" />
               </a>
             </div>
           </div>
 
-          {/* Last audio card */}
-          <div className="rounded-2xl border border-white/15 bg-black/40 p-6 backdrop-blur shadow-2xl">
+          {/* b) Última Nota */}
+          <div className="rounded-2xl border border-white/15 bg-black/40 p-6 backdrop-blur shadow-2xl flex flex-col">
             <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-gold">
-              <Mic className="h-3.5 w-3.5" /> Último audio
+              <Mic className="h-3.5 w-3.5" /> Última Nota
             </div>
             {latestAudio ? (
               <>
@@ -94,8 +102,52 @@ function Home() {
             ) : (
               <>
                 <h3 className="mt-3 font-display text-2xl font-bold">Próximamente</h3>
-                <p className="mt-2 text-sm text-white/75">El último audio publicado aparecerá aquí.</p>
+                <p className="mt-2 text-sm text-white/75">La última nota publicada aparecerá aquí.</p>
                 <div className="mt-4 h-12 rounded-md bg-white/10" />
+              </>
+            )}
+          </div>
+
+          {/* c) Partido de la fecha */}
+          <div className="rounded-2xl border border-white/15 bg-black/40 p-6 backdrop-blur shadow-2xl flex flex-col">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-gold">
+              <Tv className="h-3.5 w-3.5" /> El Partido de la Fecha
+            </div>
+            {matchOfDay ? (
+              <>
+                {matchOfDay.cover_image_url ? (
+                  <div className="mt-3 overflow-hidden rounded-xl bg-white/5">
+                    <img
+                      src={matchOfDay.cover_image_url}
+                      alt={matchOfDay.title}
+                      className="aspect-[3/4] w-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="mt-3 aspect-[3/4] rounded-xl bg-white/10 grid place-items-center">
+                    <Trophy className="h-12 w-12 text-white/30" />
+                  </div>
+                )}
+                <h3 className="mt-3 font-display text-xl font-bold leading-tight">{matchOfDay.title}</h3>
+                {matchOfDay.match_date && (
+                  <time className="mt-1 block text-xs uppercase tracking-widest text-white/60">
+                    {new Date(matchOfDay.match_date).toLocaleString("es-AR", { day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit" })}
+                  </time>
+                )}
+                {matchOfDay.stream_url && (
+                  <a href={matchOfDay.stream_url} target="_blank" rel="noreferrer" className="mt-3">
+                    <Button size="sm" className="w-full bg-gold text-gold-foreground hover:bg-gold/90 font-display uppercase tracking-wider">
+                      Ver transmisión
+                    </Button>
+                  </a>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="mt-3 aspect-[3/4] rounded-xl bg-white/10 grid place-items-center">
+                  <Trophy className="h-12 w-12 text-white/30" />
+                </div>
+                <p className="mt-3 text-sm text-white/75 text-center">Próximamente.</p>
               </>
             )}
           </div>
@@ -175,7 +227,26 @@ function Home() {
         </div>
       </section>
 
-      {/* Notas Recientes (audios) */}
+      {/* Invitados */}
+      <section id="invitados" className="px-4 py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl">
+          <SectionTitle eyebrow="Pasaron por el aire" title="Invitados" />
+          {guests.length === 0 ? (
+            <p className="mt-10 text-center text-muted-foreground">Próximamente: galería de invitados al programa.</p>
+          ) : (
+            <div className="mt-12 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+              {guests.map((g) => (
+                <figure key={g.id} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+                  <img src={g.image_url} alt={g.name || "Invitado"} className="aspect-square w-full object-cover" />
+                  {g.name && (
+                    <figcaption className="p-3 text-center text-sm font-display uppercase tracking-wider text-primary">{g.name}</figcaption>
+                  )}
+                </figure>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
       <section id="notas" className="bg-secondary px-4 py-20 sm:py-24">
         <div className="mx-auto max-w-4xl">
           <SectionTitle eyebrow="Escuchá" title="Notas Recientes" />
@@ -224,13 +295,15 @@ function Home() {
               <span>www.fmaltos.com.ar</span>
             </a>
           </div>
-          <div className="mt-10 flex justify-center gap-3">
+          <div className="mt-10 flex flex-wrap justify-center gap-3">
             {[
-              { icon: Instagram, label: "Instagram" },
-              { icon: Facebook, label: "Facebook" },
-              { icon: MessageCircle, label: "WhatsApp" },
+              { icon: Instagram, label: "Instagram", href: "#" },
+              { icon: Facebook, label: "Facebook", href: "#" },
+              { icon: MessageCircle, label: "WhatsApp", href: "#" },
+              { icon: Twitch, label: "Twitch", href: TWITCH_URL },
+              { icon: Youtube, label: "YouTube", href: YOUTUBE_URL },
             ].map((s) => (
-              <a key={s.label} href="#" aria-label={s.label} className="grid h-12 w-12 place-items-center rounded-full border border-white/30 bg-white/10 transition hover:bg-gold hover:text-gold-foreground">
+              <a key={s.label} href={s.href} target={s.href.startsWith("http") ? "_blank" : undefined} rel="noreferrer" aria-label={s.label} className="grid h-12 w-12 place-items-center rounded-full border border-white/30 bg-white/10 transition hover:bg-gold hover:text-gold-foreground">
                 <s.icon className="h-5 w-5" />
               </a>
             ))}
