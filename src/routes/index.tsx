@@ -52,63 +52,65 @@ function Home() {
 
       {/* Hero */}
       <section className="bg-pitch relative overflow-hidden px-4 py-16 text-primary-foreground sm:py-20">
-        <div className="relative z-10 mx-auto grid w-full max-w-7xl items-stretch gap-8 lg:grid-cols-3">
-          {/* a) Brand */}
-          <div className="text-center lg:text-left flex flex-col justify-center">
-            <div className="mb-6 inline-flex self-center lg:self-start items-center gap-2 rounded-full border border-gold/40 bg-black/20 px-4 py-1.5 text-xs uppercase tracking-widest text-gold backdrop-blur">
-              <Radio className="h-3.5 w-3.5" /> En vivo · 97.9 FM
-            </div>
-            <h1 className="font-display text-5xl font-bold leading-none tracking-tight text-balance sm:text-6xl">
-              A LA <span className="text-gold">CANCHA</span>
-            </h1>
-            <p className="mt-6 max-w-xl text-base text-white/85 sm:text-lg lg:mx-0 mx-auto">
-              Programa integral de deportes donde la información y los protagonistas cobran voz.
-            </p>
-            <div className="mt-6 inline-flex self-center lg:self-start flex-wrap items-center gap-2 rounded-lg border border-white/15 bg-black/30 px-4 py-2.5 text-sm backdrop-blur">
-              <Radio className="h-4 w-4 text-gold" />
-              <span className="font-semibold">Radio Altos 97.9</span>
-              <span className="opacity-60">·</span>
-              <span>Lun a Vie 19 a 21hs</span>
-            </div>
-            <a href={RADIO_WEB} target="_blank" rel="noreferrer" className="mt-3 flex items-center justify-center lg:justify-start gap-2 text-sm text-gold hover:underline">
-              <Globe className="h-4 w-4" /> www.fmaltos.com.ar
-            </a>
-            <div className="mt-5 flex justify-center lg:justify-start gap-2">
-              <a href={TWITCH_URL} target="_blank" rel="noreferrer" aria-label="Twitch" className="grid h-10 w-10 place-items-center rounded-full border border-white/30 bg-white/10 transition hover:bg-gold hover:text-gold-foreground">
-                <Twitch className="h-5 w-5" />
+        <div className="relative z-10 mx-auto grid w-full max-w-7xl items-stretch gap-8 lg:grid-cols-2">
+          {/* Columna 1: Título + Última Nota */}
+          <div className="flex flex-col gap-6">
+            <div className="text-center lg:text-left">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/40 bg-black/20 px-4 py-1.5 text-xs uppercase tracking-widest text-gold backdrop-blur">
+                <Radio className="h-3.5 w-3.5" /> En vivo · 97.9 FM
+              </div>
+              <h1 className="font-display text-5xl font-bold leading-none tracking-tight text-balance sm:text-6xl">
+                A LA <span className="text-gold">CANCHA</span>
+              </h1>
+              <p className="mt-6 max-w-xl text-base text-white/85 sm:text-lg lg:mx-0 mx-auto">
+                Programa integral de deportes donde la información y los protagonistas cobran voz.
+              </p>
+              <div className="mt-6 inline-flex flex-wrap items-center gap-2 rounded-lg border border-white/15 bg-black/30 px-4 py-2.5 text-sm backdrop-blur">
+                <Radio className="h-4 w-4 text-gold" />
+                <span className="font-semibold">Radio Altos 97.9</span>
+                <span className="opacity-60">·</span>
+                <span>Lun a Vie 19 a 21hs</span>
+              </div>
+              <a href={RADIO_WEB} target="_blank" rel="noreferrer" className="mt-3 flex items-center justify-center lg:justify-start gap-2 text-sm text-gold hover:underline">
+                <Globe className="h-4 w-4" /> www.fmaltos.com.ar
               </a>
-              <a href={YOUTUBE_URL} target="_blank" rel="noreferrer" aria-label="YouTube" className="grid h-10 w-10 place-items-center rounded-full border border-white/30 bg-white/10 transition hover:bg-gold hover:text-gold-foreground">
-                <Youtube className="h-5 w-5" />
-              </a>
+              <div className="mt-5 flex justify-center lg:justify-start gap-2">
+                <a href={TWITCH_URL} target="_blank" rel="noreferrer" aria-label="Twitch" className="grid h-10 w-10 place-items-center rounded-full border border-white/30 bg-white/10 transition hover:bg-gold hover:text-gold-foreground">
+                  <Twitch className="h-5 w-5" />
+                </a>
+                <a href={YOUTUBE_URL} target="_blank" rel="noreferrer" aria-label="YouTube" className="grid h-10 w-10 place-items-center rounded-full border border-white/30 bg-white/10 transition hover:bg-gold hover:text-gold-foreground">
+                  <Youtube className="h-5 w-5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Última Nota */}
+            <div className="rounded-2xl border border-white/15 bg-black/40 p-6 backdrop-blur shadow-2xl">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-gold">
+                <Mic className="h-3.5 w-3.5" /> Última Nota
+              </div>
+              {latestAudio ? (
+                <>
+                  <h3 className="mt-3 font-display text-2xl font-bold leading-tight">{latestAudio.title}</h3>
+                  {latestAudio.description && (
+                    <p className="mt-2 text-sm text-white/75 line-clamp-3">{latestAudio.description}</p>
+                  )}
+                  <time className="mt-3 block text-xs uppercase tracking-widest text-white/60">
+                    {latestAudio.published_at ? new Date(latestAudio.published_at).toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" }) : ""}
+                  </time>
+                  <audio controls className="mt-4 w-full" src={latestAudio.audio_url} />
+                </>
+              ) : (
+                <>
+                  <h3 className="mt-3 font-display text-2xl font-bold">Próximamente</h3>
+                  <p className="mt-2 text-sm text-white/75">La última nota publicada aparecerá aquí.</p>
+                  <div className="mt-4 h-12 rounded-md bg-white/10" />
+                </>
+              )}
             </div>
           </div>
 
-          {/* b) Última Nota */}
-          <div className="rounded-2xl border border-white/15 bg-black/40 p-6 backdrop-blur shadow-2xl flex flex-col">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-gold">
-              <Mic className="h-3.5 w-3.5" /> Última Nota
-            </div>
-            {latestAudio ? (
-              <>
-                <h3 className="mt-3 font-display text-2xl font-bold leading-tight">{latestAudio.title}</h3>
-                {latestAudio.description && (
-                  <p className="mt-2 text-sm text-white/75 line-clamp-3">{latestAudio.description}</p>
-                )}
-                <time className="mt-3 block text-xs uppercase tracking-widest text-white/60">
-                  {latestAudio.published_at ? new Date(latestAudio.published_at).toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" }) : ""}
-                </time>
-                <audio controls className="mt-4 w-full" src={latestAudio.audio_url} />
-              </>
-            ) : (
-              <>
-                <h3 className="mt-3 font-display text-2xl font-bold">Próximamente</h3>
-                <p className="mt-2 text-sm text-white/75">La última nota publicada aparecerá aquí.</p>
-                <div className="mt-4 h-12 rounded-md bg-white/10" />
-              </>
-            )}
-          </div>
-
-          {/* c) Partido de la fecha */}
+          {/* Columna 2: Partido de la fecha */}
           <div className="rounded-2xl border border-white/15 bg-black/40 p-6 backdrop-blur shadow-2xl flex flex-col">
             <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-gold">
               <Tv className="h-3.5 w-3.5" /> El Partido de la Fecha
@@ -120,11 +122,11 @@ function Home() {
                     <img
                       src={matchOfDay.cover_image_url}
                       alt={matchOfDay.title}
-                      className="aspect-[3/4] w-full object-cover"
+                      className="w-full h-auto object-contain"
                     />
                   </div>
                 ) : (
-                  <div className="mt-3 aspect-[3/4] rounded-xl bg-white/10 grid place-items-center">
+                  <div className="mt-3 aspect-video rounded-xl bg-white/10 grid place-items-center">
                     <Trophy className="h-12 w-12 text-white/30" />
                   </div>
                 )}
@@ -144,7 +146,7 @@ function Home() {
               </>
             ) : (
               <>
-                <div className="mt-3 aspect-[3/4] rounded-xl bg-white/10 grid place-items-center">
+                <div className="mt-3 aspect-video rounded-xl bg-white/10 grid place-items-center">
                   <Trophy className="h-12 w-12 text-white/30" />
                 </div>
                 <p className="mt-3 text-sm text-white/75 text-center">Próximamente.</p>
