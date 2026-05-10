@@ -14,7 +14,7 @@ export const Route = createFileRoute("/admin/dashboard")({
   component: Dashboard,
 });
 
-type Tab = "audios" | "sponsors" | "images";
+type Tab = "audios" | "matches" | "sponsors" | "guests" | "images";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -27,7 +27,9 @@ function Dashboard() {
 
   const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: "audios", label: "Notas", icon: Mic },
+    { id: "matches", label: "Partidos", icon: Tv },
     { id: "sponsors", label: "Sponsors", icon: Trophy },
+    { id: "guests", label: "Invitados", icon: Users },
     { id: "images", label: "Imágenes", icon: ImgIcon },
   ];
 
