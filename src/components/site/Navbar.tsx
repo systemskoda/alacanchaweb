@@ -27,8 +27,8 @@ export function Navbar() {
     <header className="sticky top-0 z-50 bg-primary text-primary-foreground shadow-lg">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center gap-3 font-display text-2xl font-bold tracking-wide" onClick={() => scroll("")}>
+          <span>A LA <span className="text-gold">CANCHA</span></span>
           <img src={logo} alt="A la Cancha" className="h-10 w-10 object-contain" />
-          A LA <span className="text-gold">CANCHA</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
