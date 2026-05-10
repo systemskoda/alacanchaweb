@@ -15,6 +15,8 @@ import { Footer } from "@/components/site/Footer";
 import { Button } from "@/components/ui/button";
 import heroBg from "@/assets/hero-stadium.jpg";
 import logo from "@/assets/logo.png";
+import teamFabian from "@/assets/team-fabian.png";
+import teamPie from "@/assets/team-pie.jpg";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -29,9 +31,9 @@ const TWITCH_URL = "https://www.twitch.tv/radioaltos979";
 const YOUTUBE_URL = "https://www.youtube.com/@ALACANCHARADIO";
 
 const team = [
-  { name: "Fabián Rodríguez", role: "Conductor" },
-  { name: "Mariano Rossi", role: "Coconductor" },
-  { name: "Gustavo Pie", role: "Coconductor" },
+  { name: "Fabián Rodríguez", role: "Conductor", image: teamFabian },
+  { name: "Mariano Rossi", role: "Coconductor", image: null as string | null },
+  { name: "Gustavo Pie", role: "Coconductor", image: teamPie },
 ];
 
 const RADIO_WEB = "https://www.fmaltos.com.ar";
@@ -240,9 +242,15 @@ function Home() {
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {team.map((m) => (
               <div key={m.name} className="overflow-hidden rounded-xl bg-card shadow-md transition hover:-translate-y-1 hover:shadow-xl border border-border">
-                <div className="bg-pitch flex aspect-square items-center justify-center text-primary-foreground/40">
-                  <Trophy className="h-20 w-20" />
-                </div>
+                {m.image ? (
+                  <div className="aspect-square w-full overflow-hidden bg-pitch">
+                    <img src={m.image} alt={m.name} className="h-full w-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="bg-pitch flex aspect-square items-center justify-center text-primary-foreground/40">
+                    <Trophy className="h-20 w-20" />
+                  </div>
+                )}
                 <div className="p-6 text-center">
                   <h3 className="font-display text-xl font-semibold text-primary">{m.name}</h3>
                   <p className="mt-1 text-sm uppercase tracking-widest text-primary-bright">{m.role}</p>
