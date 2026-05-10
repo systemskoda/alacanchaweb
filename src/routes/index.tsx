@@ -228,7 +228,7 @@ function Home() {
       </section>
 
       {/* Invitados */}
-      <section id="invitados" className="bg-secondary px-4 py-20 sm:py-24">
+      <section id="invitados" className="px-4 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
           <SectionTitle eyebrow="Pasaron por el aire" title="Invitados" />
           {guests.length === 0 ? (
