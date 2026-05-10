@@ -313,7 +313,7 @@ function Home() {
           </div>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
             {[
-              { icon: Instagram, label: "Instagram", href: "#" },
+              { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/alacanchabb/" },
               { icon: Facebook, label: "Facebook", href: "#" },
               { icon: MessageCircle, label: "WhatsApp", href: "#" },
               { icon: Twitch, label: "Twitch", href: TWITCH_URL },
