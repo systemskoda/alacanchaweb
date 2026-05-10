@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { Button } from "@/components/ui/button";
+import heroBg from "@/assets/hero-stadium.jpg";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -59,6 +60,12 @@ function Home() {
 
       {/* Hero */}
       <section className="bg-pitch relative overflow-hidden px-4 py-16 text-primary-foreground sm:py-20">
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${heroBg})` }}
+        />
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80" />
         <div className="relative z-10 mx-auto grid w-full max-w-7xl items-stretch gap-8 lg:grid-cols-2">
           {/* Columna 1: Título + Última Nota */}
           <div className="flex flex-col gap-6">
