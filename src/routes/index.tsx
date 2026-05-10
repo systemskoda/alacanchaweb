@@ -35,9 +35,16 @@ function Home() {
 
   useEffect(() => {
     supabase.from("audios").select("*").order("published_at", { ascending: false }).limit(3).then(({ data }) => {
-      const list = data ?? [];
-      setLatestAudio(list[0] ?? null);
-      setAudios(list);
+      setAudios(data ?? []);
+    });
+    supabase.from("audios").select("*").eq("is_featured", true).limit(1).then(({ data }) => {
+      if (data && data.length > 0) {
+        setLatestAudio(data[0]);
+      } else {
+        supabase.from("audios").select("*").order("published_at", { ascending: false }).limit(1).then(({ data: latest }) => {
+          setLatestAudio(latest?.[0] ?? null);
+        });
+      }
     });
     supabase.from("sponsors").select("*").eq("active", true).order("created_at", { ascending: false }).then(({ data }) => setSponsors(data ?? []));
     supabase.from("matches").select("*").eq("is_match_of_day", true).order("created_at", { ascending: false }).limit(1).then(({ data }) => setMatchOfDay(data?.[0] ?? null));
