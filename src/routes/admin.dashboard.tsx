@@ -170,6 +170,10 @@ function AudiosPanel() {
                 <Label>Fecha</Label>
                 <Input type="datetime-local" name="published_at" defaultValue={editing?.published_at?.slice(0, 16) ?? new Date().toISOString().slice(0, 16)} />
               </div>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="is_featured" defaultChecked={editing?.is_featured ?? false} />
+                Mostrar esta nota en el HERO (Última Nota)
+              </label>
               <DialogFooter><Button type="submit" disabled={uploading} className="bg-primary">{uploading ? "Subiendo…" : "Guardar"}</Button></DialogFooter>
             </form>
           </DialogContent>
