@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          is_featured: boolean
           published_at: string | null
           title: string
         }
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_featured?: boolean
           published_at?: string | null
           title: string
         }
@@ -36,6 +38,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_featured?: boolean
           published_at?: string | null
           title?: string
         }

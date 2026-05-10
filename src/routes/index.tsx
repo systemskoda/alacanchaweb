@@ -10,7 +10,7 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-type Audio = { id: string; title: string; description: string; audio_url: string; published_at: string | null };
+type Audio = { id: string; title: string; description: string; audio_url: string; published_at: string | null; is_featured?: boolean };
 type Sponsor = { id: string; name: string; image_url: string };
 type Match = { id: string; title: string; description: string; cover_image_url: string | null; stream_url: string | null; match_date: string | null };
 type Guest = { id: string; name: string; image_url: string };
@@ -35,9 +35,16 @@ function Home() {
 
   useEffect(() => {
     supabase.from("audios").select("*").order("published_at", { ascending: false }).limit(3).then(({ data }) => {
-      const list = data ?? [];
-      setLatestAudio(list[0] ?? null);
-      setAudios(list);
+      setAudios(data ?? []);
+    });
+    supabase.from("audios").select("*").eq("is_featured", true).limit(1).then(({ data }) => {
+      if (data && data.length > 0) {
+        setLatestAudio(data[0]);
+      } else {
+        supabase.from("audios").select("*").order("published_at", { ascending: false }).limit(1).then(({ data: latest }) => {
+          setLatestAudio(latest?.[0] ?? null);
+        });
+      }
     });
     supabase.from("sponsors").select("*").eq("active", true).order("created_at", { ascending: false }).then(({ data }) => setSponsors(data ?? []));
     supabase.from("matches").select("*").eq("is_match_of_day", true).order("created_at", { ascending: false }).limit(1).then(({ data }) => setMatchOfDay(data?.[0] ?? null));
@@ -275,7 +282,7 @@ function Home() {
             ))}
           </div>
           <div className="mt-10 text-center">
-            <Link to="/notas" target="_blank">
+            <Link to="/notas">
               <Button size="lg" className="bg-primary hover:bg-primary-bright font-display uppercase tracking-wider">
                 Escuchar más notas <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
