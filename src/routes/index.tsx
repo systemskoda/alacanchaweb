@@ -323,7 +323,7 @@ function Home() {
             {[
               { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/alacanchabb/" },
               { icon: Facebook, label: "Facebook", href: "#" },
-              { icon: MessageCircle, label: "WhatsApp", href: "#" },
+              { icon: WhatsAppIcon, label: "WhatsApp", href: "#" },
               { icon: Twitch, label: "Twitch", href: TWITCH_URL },
               { icon: Youtube, label: "YouTube", href: YOUTUBE_URL },
             ].map((s) => (
