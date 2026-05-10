@@ -205,7 +205,7 @@ function Home() {
         <div className="mx-auto max-w-5xl">
           <SectionTitle eyebrow="Sobre el ciclo" title="El Programa" />
           <p className="mx-auto mt-6 max-w-3xl text-center text-lg leading-relaxed text-muted-foreground">
-            Con más de 5.000 emisiones y 18 años al aire en los medios bahienses, A la Cancha busca ofrecer un ciclo ameno y compartir nuestra pasión con los amantes de todas las disciplinas deportivas. Moderno, ágil y comprometido socialmente.
+            Con más de 5.000 emisiones y 19 años al aire en los medios bahienses, A la Cancha busca ofrecer un ciclo ameno y compartir nuestra pasión con los amantes de todas las disciplinas deportivas. Moderno, ágil y comprometido socialmente.
           </p>
           <div className="mt-12 grid gap-6 sm:grid-cols-3">
             {[
