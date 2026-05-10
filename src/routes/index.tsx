@@ -15,7 +15,7 @@ import { Footer } from "@/components/site/Footer";
 import { Button } from "@/components/ui/button";
 import heroBg from "@/assets/hero-stadium.jpg";
 import logo from "@/assets/logo.png";
-import teamFabian from "@/assets/team-fabian.png";
+import teamFabian from "@/assets/team-fabian.jpg";
 import teamPie from "@/assets/team-pie.jpg";
 
 export const Route = createFileRoute("/")({
