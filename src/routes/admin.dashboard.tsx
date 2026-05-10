@@ -92,7 +92,7 @@ function PanelHeader({ title, action }: { title: string; action?: React.ReactNod
 }
 
 /* ---------------- AUDIOS ---------------- */
-type Audio = { id: string; title: string; description: string; audio_url: string; published_at: string | null };
+type Audio = { id: string; title: string; description: string; audio_url: string; published_at: string | null; is_featured: boolean };
 
 function AudiosPanel() {
   const [items, setItems] = useState<Audio[]>([]);
