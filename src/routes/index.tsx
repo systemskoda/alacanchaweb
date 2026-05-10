@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Radio, Calendar, Mic, Trophy, Instagram, Facebook, MessageCircle, MapPin, Clock, Globe, ArrowRight } from "lucide-react";
+import { Radio, Calendar, Mic, Trophy, Instagram, Facebook, MessageCircle, MapPin, Clock, Globe, ArrowRight, Twitch, Youtube, Tv } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
@@ -12,6 +12,11 @@ export const Route = createFileRoute("/")({
 
 type Audio = { id: string; title: string; description: string; audio_url: string; published_at: string | null };
 type Sponsor = { id: string; name: string; image_url: string };
+type Match = { id: string; title: string; description: string; cover_image_url: string | null; stream_url: string | null; match_date: string | null };
+type Guest = { id: string; name: string; image_url: string };
+
+const TWITCH_URL = "https://www.twitch.tv/radioaltos979";
+const YOUTUBE_URL = "https://www.youtube.com/@ALACANCHARADIO";
 
 const team = [
   { name: "Fabián Rodríguez", role: "Conductor" },
