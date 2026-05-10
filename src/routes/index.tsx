@@ -79,12 +79,12 @@ function Home() {
           {/* Columna 1: Título + Última Nota */}
           <div className="flex flex-col gap-6">
             <div className="text-center lg:text-left">
-              <img src={logo} alt="A la Cancha" className="mx-auto lg:mx-0 mb-6 h-28 w-28 object-contain drop-shadow-2xl" />
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/40 bg-black/20 px-4 py-1.5 text-xs uppercase tracking-widest text-gold backdrop-blur">
                 <Radio className="h-3.5 w-3.5" /> En vivo · 97.9 FM
               </div>
-              <h1 className="font-display text-5xl font-bold leading-none tracking-tight text-balance sm:text-6xl">
-                A LA <span className="text-gold">CANCHA</span>
+              <h1 className="flex items-center justify-center lg:justify-start gap-4 font-display text-5xl font-bold leading-none tracking-tight text-balance sm:text-6xl">
+                <span>A LA <span className="text-gold">CANCHA</span></span>
+                <img src={logo} alt="A la Cancha" className="h-20 w-20 sm:h-24 sm:w-24 object-contain drop-shadow-2xl" />
               </h1>
               <p className="mt-6 max-w-xl text-base text-white/85 sm:text-lg lg:mx-0 mx-auto">
                 Programa integral de deportes donde la información y los protagonistas cobran voz.
