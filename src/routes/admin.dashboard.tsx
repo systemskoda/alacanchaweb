@@ -125,6 +125,7 @@ function AudiosPanel() {
         title: String(fd.get("title")),
         description: String(fd.get("description")),
         audio_url,
+        is_featured: fd.get("is_featured") === "on",
         published_at: fd.get("published_at") ? new Date(String(fd.get("published_at"))).toISOString() : new Date().toISOString(),
       };
       const { error } = editing
