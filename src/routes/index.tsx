@@ -282,7 +282,7 @@ function Home() {
             ))}
           </div>
           <div className="mt-10 text-center">
-            <Link to="/notas" target="_blank">
+            <Link to="/notas">
               <Button size="lg" className="bg-primary hover:bg-primary-bright font-display uppercase tracking-wider">
                 Escuchar más notas <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
