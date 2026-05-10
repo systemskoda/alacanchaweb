@@ -351,3 +351,227 @@ function ImagesPanel() {
     </>
   );
 }
+
+/* ---------------- MATCHES (Transmisiones de partidos) ---------------- */
+type Match = {
+  id: string;
+  title: string;
+  description: string;
+  cover_image_url: string | null;
+  stream_url: string | null;
+  match_date: string | null;
+  is_match_of_day: boolean;
+};
+
+function MatchesPanel() {
+  const [items, setItems] = useState<Match[]>([]);
+  const [editing, setEditing] = useState<Match | null>(null);
+  const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const load = async () => {
+    const { data } = await supabase.from("matches").select("*").order("created_at", { ascending: false });
+    setItems(data ?? []);
+  };
+  useEffect(() => { load(); }, []);
+
+  const save = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setUploading(true);
+    try {
+      const fd = new FormData(e.currentTarget);
+      const file = fd.get("file") as File | null;
+      let cover_image_url = editing?.cover_image_url ?? null;
+      if (file && file.size > 0) {
+        const path = `${Date.now()}-${file.name}`;
+        const { error: upErr } = await supabase.storage.from("matches").upload(path, file);
+        if (upErr) throw upErr;
+        cover_image_url = supabase.storage.from("matches").getPublicUrl(path).data.publicUrl;
+      }
+      const payload = {
+        title: String(fd.get("title")),
+        description: String(fd.get("description") ?? ""),
+        stream_url: String(fd.get("stream_url") ?? "") || null,
+        match_date: fd.get("match_date") ? new Date(String(fd.get("match_date"))).toISOString() : null,
+        is_match_of_day: fd.get("is_match_of_day") === "on",
+        cover_image_url,
+      };
+      const { error } = editing
+        ? await supabase.from("matches").update(payload).eq("id", editing.id)
+        : await supabase.from("matches").insert(payload);
+      if (error) throw error;
+      toast.success("Partido guardado");
+      setOpen(false); setEditing(null); load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const toggleMatchOfDay = async (m: Match) => {
+    const { error } = await supabase.from("matches").update({ is_match_of_day: !m.is_match_of_day }).eq("id", m.id);
+    if (error) return toast.error(error.message);
+    toast.success(!m.is_match_of_day ? "Marcado como Partido de la Fecha" : "Desmarcado");
+    load();
+  };
+
+  const remove = async (m: Match) => {
+    if (!confirm("¿Eliminar este partido?")) return;
+    try {
+      if (m.cover_image_url) {
+        const path = m.cover_image_url.split("/matches/")[1];
+        if (path) await supabase.storage.from("matches").remove([path]);
+      }
+      const { error } = await supabase.from("matches").delete().eq("id", m.id);
+      if (error) throw error;
+      toast.success("Eliminado"); load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error");
+    }
+  };
+
+  return (
+    <>
+      <PanelHeader title="Transmisiones de partidos" action={
+        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
+          <DialogTrigger asChild>
+            <Button onClick={() => setEditing(null)} className="bg-primary hover:bg-primary-bright">
+              <Plus className="mr-2 h-4 w-4" /> Nuevo partido
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>{editing ? "Editar partido" : "Nuevo partido"}</DialogTitle></DialogHeader>
+            <form onSubmit={save} className="space-y-4">
+              <div><Label>Título</Label><Input name="title" required defaultValue={editing?.title} /></div>
+              <div><Label>Descripción</Label><Textarea name="description" rows={3} defaultValue={editing?.description} /></div>
+              <div>
+                <Label>Imagen vertical (cover) {editing && "(opcional)"}</Label>
+                <Input name="file" type="file" accept="image/*" />
+              </div>
+              <div><Label>Link de transmisión (opcional)</Label><Input name="stream_url" type="url" placeholder="https://..." defaultValue={editing?.stream_url ?? ""} /></div>
+              <div><Label>Fecha del partido</Label><Input type="datetime-local" name="match_date" defaultValue={editing?.match_date?.slice(0, 16) ?? ""} /></div>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="is_match_of_day" defaultChecked={editing?.is_match_of_day} />
+                <span>Marcar como <strong>Partido de la Fecha</strong> (se mostrará en el HERO)</span>
+              </label>
+              <DialogFooter><Button type="submit" disabled={uploading} className="bg-primary">{uploading ? "Subiendo…" : "Guardar"}</Button></DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      } />
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {items.length === 0 && <p className="col-span-full text-center text-muted-foreground py-12">Sin partidos todavía</p>}
+        {items.map((m) => (
+          <div key={m.id} className="overflow-hidden rounded-xl border bg-card shadow-sm">
+            {m.cover_image_url ? (
+              <img src={m.cover_image_url} alt={m.title} className="aspect-[3/4] w-full object-cover" />
+            ) : (
+              <div className="aspect-[3/4] grid place-items-center bg-secondary"><Tv className="h-10 w-10 text-muted-foreground/30" /></div>
+            )}
+            <div className="p-4">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-display font-semibold text-primary">{m.title}</h3>
+                {m.is_match_of_day && <span className="inline-flex items-center gap-1 rounded-full bg-gold px-2 py-0.5 text-[10px] font-bold uppercase text-gold-foreground"><Star className="h-3 w-3" /> Fecha</span>}
+              </div>
+              {m.match_date && <time className="block text-xs text-muted-foreground">{new Date(m.match_date).toLocaleString("es-AR")}</time>}
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <Button size="sm" variant="outline" onClick={() => toggleMatchOfDay(m)}>
+                  <Star className="mr-1 h-3.5 w-3.5" /> {m.is_match_of_day ? "Quitar" : "Partido de la Fecha"}
+                </Button>
+                <div className="flex">
+                  <Button size="sm" variant="ghost" onClick={() => { setEditing(m); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => remove(m)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+/* ---------------- GUESTS (Invitados) ---------------- */
+type Guest = { id: string; name: string; image_url: string };
+
+function GuestsPanel() {
+  const [items, setItems] = useState<Guest[]>([]);
+  const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const load = async () => {
+    const { data } = await supabase.from("guests").select("*").order("created_at", { ascending: false });
+    setItems(data ?? []);
+  };
+  useEffect(() => { load(); }, []);
+
+  const save = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setUploading(true);
+    try {
+      const fd = new FormData(e.currentTarget);
+      const file = fd.get("file") as File;
+      if (!file || file.size === 0) throw new Error("Seleccioná una foto");
+      const path = `${Date.now()}-${file.name}`;
+      const { error: upErr } = await supabase.storage.from("guests").upload(path, file);
+      if (upErr) throw upErr;
+      const url = supabase.storage.from("guests").getPublicUrl(path).data.publicUrl;
+      const { error } = await supabase.from("guests").insert({ name: String(fd.get("name") ?? ""), image_url: url });
+      if (error) throw error;
+      toast.success("Invitado agregado");
+      setOpen(false); load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const remove = async (g: Guest) => {
+    if (!confirm("¿Eliminar esta foto?")) return;
+    try {
+      const path = g.image_url.split("/guests/")[1];
+      if (path) await supabase.storage.from("guests").remove([path]);
+      const { error } = await supabase.from("guests").delete().eq("id", g.id);
+      if (error) throw error;
+      toast.success("Eliminada"); load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error");
+    }
+  };
+
+  return (
+    <>
+      <PanelHeader title="Invitados (Fotos)" action={
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-primary hover:bg-primary-bright"><Plus className="mr-2 h-4 w-4" /> Agregar foto</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Nueva foto de invitado</DialogTitle></DialogHeader>
+            <form onSubmit={save} className="space-y-4">
+              <div><Label>Nombre</Label><Input name="name" placeholder="Opcional" /></div>
+              <div><Label>Foto</Label><Input name="file" type="file" accept="image/*" required /></div>
+              <DialogFooter><Button type="submit" disabled={uploading} className="bg-primary">{uploading ? "Subiendo…" : "Guardar"}</Button></DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      } />
+
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        {items.length === 0 && <p className="col-span-full text-center text-muted-foreground py-12">Sin invitados todavía</p>}
+        {items.map((g) => (
+          <div key={g.id} className="group relative overflow-hidden rounded-xl border bg-card shadow-sm">
+            <img src={g.image_url} alt={g.name} className="aspect-square w-full object-cover" />
+            {g.name && <div className="p-2 text-xs text-center font-display uppercase text-primary truncate">{g.name}</div>}
+            <Button size="icon" variant="destructive" onClick={() => remove(g)} className="absolute right-2 top-2 h-8 w-8 opacity-0 transition group-hover:opacity-100">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
