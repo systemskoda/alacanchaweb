@@ -227,7 +227,26 @@ function Home() {
         </div>
       </section>
 
-      {/* Notas Recientes (audios) */}
+      {/* Invitados */}
+      <section id="invitados" className="bg-secondary px-4 py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl">
+          <SectionTitle eyebrow="Pasaron por el aire" title="Invitados" />
+          {guests.length === 0 ? (
+            <p className="mt-10 text-center text-muted-foreground">Próximamente: galería de invitados al programa.</p>
+          ) : (
+            <div className="mt-12 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+              {guests.map((g) => (
+                <figure key={g.id} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+                  <img src={g.image_url} alt={g.name || "Invitado"} className="aspect-square w-full object-cover" />
+                  {g.name && (
+                    <figcaption className="p-3 text-center text-sm font-display uppercase tracking-wider text-primary">{g.name}</figcaption>
+                  )}
+                </figure>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
       <section id="notas" className="bg-secondary px-4 py-20 sm:py-24">
         <div className="mx-auto max-w-4xl">
           <SectionTitle eyebrow="Escuchá" title="Notas Recientes" />
