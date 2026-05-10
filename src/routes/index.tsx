@@ -20,8 +20,8 @@ const YOUTUBE_URL = "https://www.youtube.com/@ALACANCHARADIO";
 
 const team = [
   { name: "Fabián Rodríguez", role: "Conductor" },
-  { name: "Mariano Rossi", role: "Columnista" },
-  { name: "Gustavo Pie", role: "Columnista" },
+  { name: "Mariano Rossi", role: "Coconductor" },
+  { name: "Gustavo Pie", role: "Coconductor" },
 ];
 
 const RADIO_WEB = "https://www.fmaltos.com.ar";
@@ -194,7 +194,7 @@ function Home() {
           <div className="mt-12 grid gap-6 sm:grid-cols-3">
             {[
               { icon: Mic, value: "5.000+", label: "Emisiones" },
-              { icon: Calendar, value: "18", label: "Años al aire" },
+              { icon: Calendar, value: "19", label: "Años al aire" },
               { icon: Radio, value: "97.9", label: "FM" },
             ].map((s) => (
               <div key={s.label} className="group rounded-xl border-2 border-border bg-card p-8 text-center transition hover:border-primary-bright hover:shadow-xl">
