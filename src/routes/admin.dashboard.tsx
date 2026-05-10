@@ -189,7 +189,7 @@ function AudiosPanel() {
             {items.length === 0 && <tr><td colSpan={3} className="p-8 text-center text-muted-foreground">Sin audios todavía</td></tr>}
             {items.map((a) => (
               <tr key={a.id} className="border-t">
-                <td className="p-4 font-medium">{a.title}</td>
+                <td className="p-4 font-medium">{a.title} {a.is_featured && <span className="ml-2 rounded bg-gold/20 px-2 py-0.5 text-xs uppercase tracking-wider text-primary">En Hero</span>}</td>
                 <td className="p-4 text-muted-foreground">{a.published_at ? new Date(a.published_at).toLocaleDateString("es-AR") : "—"}</td>
                 <td className="p-4 text-right">
                   <Button size="sm" variant="ghost" onClick={() => { setEditing(a); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
