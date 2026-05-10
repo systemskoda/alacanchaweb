@@ -30,6 +30,8 @@ function Home() {
   const [audios, setAudios] = useState<Audio[]>([]);
   const [latestAudio, setLatestAudio] = useState<Audio | null>(null);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [matchOfDay, setMatchOfDay] = useState<Match | null>(null);
+  const [guests, setGuests] = useState<Guest[]>([]);
 
   useEffect(() => {
     supabase.from("audios").select("*").order("published_at", { ascending: false }).limit(3).then(({ data }) => {
@@ -38,6 +40,8 @@ function Home() {
       setAudios(list);
     });
     supabase.from("sponsors").select("*").eq("active", true).order("created_at", { ascending: false }).then(({ data }) => setSponsors(data ?? []));
+    supabase.from("matches").select("*").eq("is_match_of_day", true).order("created_at", { ascending: false }).limit(1).then(({ data }) => setMatchOfDay(data?.[0] ?? null));
+    supabase.from("guests").select("*").order("created_at", { ascending: false }).then(({ data }) => setGuests(data ?? []));
   }, []);
 
   const scroll = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
