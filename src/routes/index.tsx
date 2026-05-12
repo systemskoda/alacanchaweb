@@ -17,6 +17,7 @@ import heroBg from "@/assets/hero-stadium.jpg";
 import logo from "@/assets/logo.png";
 import teamFabian from "@/assets/team-fabian.jpg";
 import teamPie from "@/assets/team-pie.jpg";
+import teamRossi from "@/assets/team-rossi.jpg";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -32,7 +33,7 @@ const YOUTUBE_URL = "https://www.youtube.com/@ALACANCHARADIO";
 
 const team = [
   { name: "Fabián Rodríguez", role: "Conductor", image: teamFabian },
-  { name: "Mariano Rossi", role: "Coconductor", image: null as string | null },
+  { name: "Mariano Rossi", role: "Coconductor", image: teamRossi },
   { name: "Gustavo Pie", role: "Coconductor", image: teamPie },
 ];
 
