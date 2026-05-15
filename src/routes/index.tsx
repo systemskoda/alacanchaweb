@@ -30,6 +30,7 @@ type Guest = { id: string; name: string; image_url: string };
 
 const TWITCH_URL = "https://www.twitch.tv/radioaltos979";
 const YOUTUBE_URL = "https://www.youtube.com/@ALACANCHARADIO";
+const INSTAGRAM_URL = "https://www.instagram.com/alacanchabb/";
 
 const team = [
   { name: "Fabián Rodríguez", role: "Conductor", image: teamFabian },
@@ -107,6 +108,9 @@ function Home() {
                 </a>
                 <a href={YOUTUBE_URL} target="_blank" rel="noreferrer" aria-label="YouTube" className="grid h-10 w-10 place-items-center rounded-full border border-white/30 bg-white/10 transition hover:bg-gold hover:text-gold-foreground">
                   <Youtube className="h-5 w-5" />
+                </a>
+                <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" aria-label="Instagram" className="grid h-10 w-10 place-items-center rounded-full border border-white/30 bg-white/10 transition hover:bg-gold hover:text-gold-foreground">
+                  <Instagram className="h-5 w-5" />
                 </a>
               </div>
             </div>
