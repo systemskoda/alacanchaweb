@@ -366,6 +366,7 @@ function ContactRow({ icon: Icon, label }: { icon: React.ComponentType<{ classNa
 }
 
 function PaginatedGallery({ items, emptyText }: PaginatedGalleryProps) {
+
   const [page, setPage] = useState(1);
   // const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -399,14 +400,6 @@ function PaginatedGallery({ items, emptyText }: PaginatedGalleryProps) {
     page * ITEMS_PER_PAGE
   );
 
-  if (items.length === 0) {
-    return (
-      <p className="mt-10 text-center text-muted-foreground">
-        {emptyText}
-      </p>
-    );
-  }
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (selectedIndex === null) return;
@@ -422,6 +415,14 @@ function PaginatedGallery({ items, emptyText }: PaginatedGalleryProps) {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [selectedIndex]);
+
+  if (items.length === 0) {
+    return (
+      <p className="mt-10 text-center text-muted-foreground">
+        {emptyText}
+      </p>
+    );
+  }
 
   return (
     <>
