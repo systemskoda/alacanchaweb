@@ -291,7 +291,7 @@ function Home() {
             items={images.map((img) => ({
               id: img.id,
               image_url: img.url,
-              name:"",
+              name: "",
             }))}
             emptyText="Próximamente: imágenes de la temporada 2026."
           />
@@ -367,6 +367,30 @@ function ContactRow({ icon: Icon, label }: { icon: React.ComponentType<{ classNa
 
 function PaginatedGallery({ items, emptyText }: PaginatedGalleryProps) {
   const [page, setPage] = useState(1);
+  // const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const selectedImage =
+    selectedIndex !== null ? items[selectedIndex] : null;
+
+  const prevImage = () => {
+    if (selectedIndex === null) return;
+
+    setSelectedIndex(
+      selectedIndex === 0
+        ? items.length - 1
+        : selectedIndex - 1
+    );
+  };
+
+  const nextImage = () => {
+    if (selectedIndex === null) return;
+
+    setSelectedIndex(
+      selectedIndex === items.length - 1
+        ? 0
+        : selectedIndex + 1
+    );
+  };
 
   const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
 
@@ -383,27 +407,49 @@ function PaginatedGallery({ items, emptyText }: PaginatedGalleryProps) {
     );
   }
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (selectedIndex === null) return;
+
+      if (e.key === "ArrowLeft") prevImage();
+      if (e.key === "ArrowRight") nextImage();
+      if (e.key === "Escape") setSelectedIndex(null);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedIndex]);
+
   return (
     <>
       <div className="mt-12 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-        {paginatedItems.map((item) => (
-          <figure
-            key={item.id}
-            className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-          >
-            <img
-              src={item.image_url}
-              alt={item.name || "Imagen"}
-              className="aspect-square w-full object-cover"
-            />
+        {/* {paginatedItems.map((item) => ( */}
+        {paginatedItems.map((item, index) => {
+          const globalIndex = (page - 1) * ITEMS_PER_PAGE + index;
 
-            {item.name && (
-              <figcaption className="p-3 text-center text-sm font-display uppercase tracking-wider text-primary">
-                {item.name}
-              </figcaption>
-            )}
-          </figure>
-        ))}
+          return (
+            <figure
+              key={item.id}
+              onClick={() => setSelectedIndex(index)}
+              className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+            >
+              <img
+                src={item.image_url}
+                alt={item.name || "Imagen"}
+                className="aspect-square w-full object-cover"
+              />
+
+              {item.name && (
+                <figcaption className="p-3 text-center text-sm font-display uppercase tracking-wider text-primary">
+                  {item.name}
+                </figcaption>
+              )}
+            </figure>
+          );
+        })}
       </div>
 
       {totalPages > 1 && (
@@ -427,6 +473,98 @@ function PaginatedGallery({ items, emptyText }: PaginatedGalleryProps) {
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
+        </div>
+      )}
+
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md"
+          onClick={() => setSelectedIndex(null)}
+        >
+          {/* Cerrar */}
+          <button
+            onClick={() => setSelectedIndex(null)}
+            className="absolute right-6 top-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+          >
+            ✕
+          </button>
+
+          {/* Contador superior */}
+          <div className="absolute left-8 top-8 z-50 text-3xl font-light text-white">
+            {selectedIndex! + 1}
+            <span className="mx-2 text-white/50">/</span>
+            {items.length}
+          </div>
+
+          {/* Flecha izquierda */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              prevImage();
+            }}
+            className="absolute left-6 top-1/2 z-50 flex h-20 w-20 -translate-y-1/2 items-center justify-center rounded-full border border-gold/40 bg-black/30 text-white shadow-[0_0_30px_rgba(255,215,0,0.15)] backdrop-blur transition hover:scale-105 hover:bg-black/50"
+          >
+            <ChevronLeft className="h-12 w-12" />
+          </button>
+
+          {/* Flecha derecha */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              nextImage();
+            }}
+            className="absolute right-6 top-1/2 z-50 flex h-20 w-20 -translate-y-1/2 items-center justify-center rounded-full border border-gold/40 bg-black/30 text-white shadow-[0_0_30px_rgba(255,215,0,0.15)] backdrop-blur transition hover:scale-105 hover:bg-black/50"
+          >
+            <ChevronRight className="h-12 w-12" />
+          </button>
+
+          {/* Imagen principal */}
+          <div
+            className="flex h-full w-full items-center justify-center px-24 py-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={selectedImage.image_url}
+              alt={selectedImage.name || "Imagen"}
+              className="max-h-full max-w-full rounded-2xl object-contain shadow-2xl"
+            />
+          </div>
+
+          {/* Info inferior */}
+          <div className="absolute bottom-28 left-1/2 z-50 -translate-x-1/2 text-center">
+            <div className="text-xl font-semibold text-gold">
+              {selectedIndex! + 1} / {items.length}
+            </div>
+
+            <div className="mt-1 text-lg text-white/80">
+              {selectedImage.name || "Sin nombre"}
+            </div>
+          </div>
+
+          {/* Miniaturas */}
+          <div className="absolute bottom-0 left-0 right-0 z-50 overflow-x-auto bg-black/40 px-6 py-4 backdrop-blur-md">
+            <div className="flex gap-3">
+              {items.map((item, idx) => (
+                <button
+                  key={item.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedIndex(idx);
+                  }}
+                  className={`overflow-hidden rounded-xl border-2 transition ${idx === selectedIndex
+                    ? "border-gold scale-105"
+                    : "border-transparent opacity-60 hover:opacity-100"
+                    }`}
+                >
+                  <img
+                    src={item.image_url}
+                    alt={item.name || "Miniatura"}
+                    className="h-24 w-36 object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </>
