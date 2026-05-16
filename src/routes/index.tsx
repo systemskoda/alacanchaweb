@@ -427,10 +427,7 @@ function PaginatedGallery({ items, emptyText }: PaginatedGalleryProps) {
   return (
     <>
       <div className="mt-12 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-        {/* {paginatedItems.map((item) => ( */}
         {paginatedItems.map((item, index) => {
-          const globalIndex = (page - 1) * ITEMS_PER_PAGE + index;
-
           return (
             <figure
               key={item.id}
@@ -503,9 +500,9 @@ function PaginatedGallery({ items, emptyText }: PaginatedGalleryProps) {
               e.stopPropagation();
               prevImage();
             }}
-            className="absolute left-6 top-1/2 z-50 flex h-20 w-20 -translate-y-1/2 items-center justify-center rounded-full border border-gold/40 bg-black/30 text-white shadow-[0_0_30px_rgba(255,215,0,0.15)] backdrop-blur transition hover:scale-105 hover:bg-black/50"
+            className="absolute left-2 sm:left-6 top-1/2 z-50 flex h-10 w-10 sm:h-20 sm:w-20 -translate-y-1/2 items-center justify-center rounded-full border border-gold/40 bg-black/40 text-white shadow-[0_0_20px_rgba(255,215,0,0.15)] backdrop-blur transition hover:scale-105 hover:bg-black/60"
           >
-            <ChevronLeft className="h-12 w-12" />
+            <ChevronLeft className="h-6 w-6 sm:h-12 sm:w-12" />
           </button>
 
           {/* Flecha derecha */}
@@ -514,9 +511,9 @@ function PaginatedGallery({ items, emptyText }: PaginatedGalleryProps) {
               e.stopPropagation();
               nextImage();
             }}
-            className="absolute right-6 top-1/2 z-50 flex h-20 w-20 -translate-y-1/2 items-center justify-center rounded-full border border-gold/40 bg-black/30 text-white shadow-[0_0_30px_rgba(255,215,0,0.15)] backdrop-blur transition hover:scale-105 hover:bg-black/50"
+            className="absolute right-2 sm:right-6 top-1/2 z-50 flex h-10 w-10 sm:h-20 sm:w-20 -translate-y-1/2 items-center justify-center rounded-full border border-gold/40 bg-black/40 text-white shadow-[0_0_20px_rgba(255,215,0,0.15)] backdrop-blur transition hover:scale-105 hover:bg-black/60"
           >
-            <ChevronRight className="h-12 w-12" />
+            <ChevronRight className="h-6 w-6 sm:h-12 sm:w-12" />
           </button>
 
           {/* Imagen principal */}
@@ -527,7 +524,7 @@ function PaginatedGallery({ items, emptyText }: PaginatedGalleryProps) {
             <img
               src={selectedImage.image_url}
               alt={selectedImage.name || "Imagen"}
-              className="max-h-full max-w-full rounded-2xl object-contain shadow-2xl"
+              className=" w-auto max-w-[92vw] max-h-[82vh] rounded-2xl object-contain shadow-2xl"
             />
           </div>
         </div>
