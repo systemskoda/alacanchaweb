@@ -530,42 +530,6 @@ function PaginatedGallery({ items, emptyText }: PaginatedGalleryProps) {
               className="max-h-full max-w-full rounded-2xl object-contain shadow-2xl"
             />
           </div>
-
-          {/* Info inferior */}
-          <div className="absolute bottom-28 left-1/2 z-50 -translate-x-1/2 text-center">
-            <div className="text-xl font-semibold text-gold">
-              {selectedIndex! + 1} / {items.length}
-            </div>
-
-            <div className="mt-1 text-lg text-white/80">
-              {selectedImage.name || "Sin nombre"}
-            </div>
-          </div>
-
-          {/* Miniaturas */}
-          <div className="absolute bottom-0 left-0 right-0 z-50 overflow-x-auto bg-black/40 px-6 py-4 backdrop-blur-md">
-            <div className="flex gap-3">
-              {items.map((item, idx) => (
-                <button
-                  key={item.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedIndex(idx);
-                  }}
-                  className={`overflow-hidden rounded-xl border-2 transition ${idx === selectedIndex
-                    ? "border-gold scale-105"
-                    : "border-transparent opacity-60 hover:opacity-100"
-                    }`}
-                >
-                  <img
-                    src={item.image_url}
-                    alt={item.name || "Miniatura"}
-                    className="h-24 w-36 object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       )}
     </>
