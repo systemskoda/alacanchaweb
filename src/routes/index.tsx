@@ -310,6 +310,42 @@ function Home() {
         </div>
       </section>
 
+      {/* Notas Recientes */}
+      <section id="notas" className="bg-secondary px-4 py-20 sm:py-24">
+        <div className="mx-auto max-w-4xl">
+          <SectionTitle eyebrow="Escuchá" title="Notas Recientes" />
+          <div className="mt-12 space-y-4">
+            {(audios.length ? audios : Array.from({ length: 3 }).map((_, i) => ({
+              id: `ph-${i}`, title: "Nota próximamente", description: "Las notas del programa aparecerán aquí.", audio_url: "", published_at: null,
+            }) as Audio)).map((a) => (
+              <div key={a.id} className="rounded-xl border border-border bg-card p-6 shadow-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="font-display text-lg font-semibold text-primary">{a.title}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{a.description}</p>
+                  </div>
+                  <time className="shrink-0 text-xs uppercase tracking-widest text-muted-foreground">
+                    {a.published_at ? new Date(a.published_at).toLocaleDateString("es-AR") : "—"}
+                  </time>
+                </div>
+                {a.audio_url ? (
+                  <audio controls className="mt-4 w-full" src={a.audio_url} />
+                ) : (
+                  <div className="mt-4 h-12 rounded-md bg-secondary" />
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 text-center">
+            <Link to="/notas">
+              <Button size="lg" className="bg-primary hover:bg-primary-bright font-display uppercase tracking-wider">
+                Escuchar más notas <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Contact */}
       <section id="contacto" className="bg-pitch px-4 py-20 text-primary-foreground sm:py-24">
         <div className="mx-auto max-w-3xl text-center">
