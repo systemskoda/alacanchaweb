@@ -1,11 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Radio, Calendar, Mic, Trophy, Instagram, Facebook, MapPin, Clock, Globe, ArrowRight, Twitch, Youtube, Tv } from "lucide-react";
+import { Radio, Calendar, Mic, Trophy, Instagram, Facebook, MapPin, Clock, Globe, ArrowRight, Twitch, Youtube, Tv, ChevronLeft, ChevronRight } from "lucide-react";
+
+type GalleryItem = {
+  id: string;
+  image_url: string;
+  name?: string;
+};
+
+type PaginatedGalleryProps = {
+  items: GalleryItem[];
+  emptyText: string;
+};
+
+const ITEMS_PER_PAGE = 8;
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.198-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.71.306 1.263.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/>
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.198-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.71.306 1.263.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413" />
     </svg>
   );
 }
@@ -27,6 +40,7 @@ type Audio = { id: string; title: string; description: string; audio_url: string
 type Sponsor = { id: string; name: string; image_url: string };
 type Match = { id: string; title: string; description: string; cover_image_url: string | null; stream_url: string | null; match_date: string | null };
 type Guest = { id: string; name: string; image_url: string };
+type Image = { id: string; filename: string; url: string };
 
 const TWITCH_URL = "https://www.twitch.tv/radioaltos979";
 const YOUTUBE_URL = "https://www.youtube.com/@ALACANCHARADIO";
@@ -46,6 +60,7 @@ function Home() {
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [matchOfDay, setMatchOfDay] = useState<Match | null>(null);
   const [guests, setGuests] = useState<Guest[]>([]);
+  const [images, setImages] = useState<Image[]>([]);
 
   useEffect(() => {
     supabase.from("audios").select("*").order("published_at", { ascending: false }).limit(3).then(({ data }) => {
@@ -63,6 +78,7 @@ function Home() {
     supabase.from("sponsors").select("*").eq("active", true).order("created_at", { ascending: false }).then(({ data }) => setSponsors(data ?? []));
     supabase.from("matches").select("*").eq("is_match_of_day", true).order("created_at", { ascending: false }).limit(1).then(({ data }) => setMatchOfDay(data?.[0] ?? null));
     supabase.from("guests").select("*").order("created_at", { ascending: false }).then(({ data }) => setGuests(data ?? []));
+    supabase.from("images").select("*").order("created_at", { ascending: false }).then(({ data }) => setImages(data ?? []));
   }, []);
 
   const scroll = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -266,58 +282,31 @@ function Home() {
         </div>
       </section>
 
-      {/* Invitados */}
-      <section id="invitados" className="px-4 py-20 sm:py-24">
+      {/* Temporada 2026 */}
+      <section id="temporada-2026" className="bg-secondary px-4 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
-          <SectionTitle eyebrow="Pasaron por el aire" title="Invitados" />
-          {guests.length === 0 ? (
-            <p className="mt-10 text-center text-muted-foreground">Próximamente: galería de invitados al programa.</p>
-          ) : (
-            <div className="mt-12 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-              {guests.map((g) => (
-                <figure key={g.id} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
-                  <img src={g.image_url} alt={g.name || "Invitado"} className="aspect-square w-full object-cover" />
-                  {g.name && (
-                    <figcaption className="p-3 text-center text-sm font-display uppercase tracking-wider text-primary">{g.name}</figcaption>
-                  )}
-                </figure>
-              ))}
-            </div>
-          )}
+          <SectionTitle eyebrow="Nueva temporada" title="Temporada 2026" />
+
+          <PaginatedGallery
+            items={images.map((img) => ({
+              id: img.id,
+              image_url: img.url,
+              name:"",
+            }))}
+            emptyText="Próximamente: imágenes de la temporada 2026."
+          />
         </div>
       </section>
-      <section id="notas" className="bg-secondary px-4 py-20 sm:py-24">
-        <div className="mx-auto max-w-4xl">
-          <SectionTitle eyebrow="Escuchá" title="Notas Recientes" />
-          <div className="mt-12 space-y-4">
-            {(audios.length ? audios : Array.from({ length: 3 }).map((_, i) => ({
-              id: `ph-${i}`, title: "Nota próximamente", description: "Las notas del programa aparecerán aquí.", audio_url: "", published_at: null,
-            }) as Audio)).map((a) => (
-              <div key={a.id} className="rounded-xl border border-border bg-card p-6 shadow-sm">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="font-display text-lg font-semibold text-primary">{a.title}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">{a.description}</p>
-                  </div>
-                  <time className="shrink-0 text-xs uppercase tracking-widest text-muted-foreground">
-                    {a.published_at ? new Date(a.published_at).toLocaleDateString("es-AR") : "—"}
-                  </time>
-                </div>
-                {a.audio_url ? (
-                  <audio controls className="mt-4 w-full" src={a.audio_url} />
-                ) : (
-                  <div className="mt-4 h-12 rounded-md bg-secondary" />
-                )}
-              </div>
-            ))}
-          </div>
-          <div className="mt-10 text-center">
-            <Link to="/notas">
-              <Button size="lg" className="bg-primary hover:bg-primary-bright font-display uppercase tracking-wider">
-                Escuchar más notas <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
+
+      {/* Fotos Históricas */}
+      <section id="fotos-historicas" className="px-4 py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl">
+          <SectionTitle eyebrow="Revivilas" title="Fotos Históricas" />
+
+          <PaginatedGallery
+            items={guests}
+            emptyText="Próximamente: fotos históricas del programa."
+          />
         </div>
       </section>
 
@@ -373,5 +362,73 @@ function ContactRow({ icon: Icon, label }: { icon: React.ComponentType<{ classNa
       <Icon className="h-5 w-5 text-gold" />
       <span>{label}</span>
     </div>
+  );
+}
+
+function PaginatedGallery({ items, emptyText }: PaginatedGalleryProps) {
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
+
+  const paginatedItems = items.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE
+  );
+
+  if (items.length === 0) {
+    return (
+      <p className="mt-10 text-center text-muted-foreground">
+        {emptyText}
+      </p>
+    );
+  }
+
+  return (
+    <>
+      <div className="mt-12 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+        {paginatedItems.map((item) => (
+          <figure
+            key={item.id}
+            className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+          >
+            <img
+              src={item.image_url}
+              alt={item.name || "Imagen"}
+              className="aspect-square w-full object-cover"
+            />
+
+            {item.name && (
+              <figcaption className="p-3 text-center text-sm font-display uppercase tracking-wider text-primary">
+                {item.name}
+              </figcaption>
+            )}
+          </figure>
+        ))}
+      </div>
+
+      {totalPages > 1 && (
+        <div className="mt-8 flex items-center justify-center gap-4">
+          <Button
+            variant="outline"
+            onClick={() => setPage((p) => Math.max(p - 1, 1))}
+            disabled={page === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+
+          <span className="text-sm text-muted-foreground">
+            Página {page} de {totalPages}
+          </span>
+
+          <Button
+            variant="outline"
+            onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+            disabled={page === totalPages}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+    </>
   );
 }
