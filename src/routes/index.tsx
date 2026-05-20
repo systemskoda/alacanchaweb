@@ -37,6 +37,7 @@ export const Route = createFileRoute("/")({
 });
 
 type Audio = { id: string; title: string; description: string; audio_url: string; published_at: string | null; is_featured?: boolean };
+type Relato = { id: string; title: string; description: string; relato_url: string; published_at: string | null; is_featured?: boolean };
 type Sponsor = { id: string; name: string; image_url: string };
 type Match = { id: string; title: string; description: string; cover_image_url: string | null; stream_url: string | null; match_date: string | null };
 type Guest = { id: string; name: string; image_url: string };
@@ -56,11 +57,12 @@ const RADIO_WEB = "https://www.fmaltos.com.ar";
 
 function Home() {
   const [audios, setAudios] = useState<Audio[]>([]);
+  const [relatos, setRelatos] = useState<Relato[]>([]);
   const [latestAudio, setLatestAudio] = useState<Audio | null>(null);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [matchOfDay, setMatchOfDay] = useState<Match | null>(null);
-  const [guests, setGuests] = useState<Guest[]>([]);
-  const [images, setImages] = useState<Image[]>([]);
+  const [fotos_historicas, setFotosHistoricas] = useState<Guest[]>([]);
+  const [fotos_2026, setFotos2026] = useState<Image[]>([]);
 
   useEffect(() => {
     supabase.from("audios").select("*").order("published_at", { ascending: false }).limit(3).then(({ data }) => {
@@ -75,10 +77,13 @@ function Home() {
         });
       }
     });
+    supabase.from("relatos_goles").select("*").order("published_at", { ascending: false }).limit(3).then(({ data }) => {
+      setRelatos(data ?? []);
+    });
     supabase.from("sponsors").select("*").eq("active", true).order("created_at", { ascending: false }).then(({ data }) => setSponsors(data ?? []));
     supabase.from("matches").select("*").eq("is_match_of_day", true).order("created_at", { ascending: false }).limit(1).then(({ data }) => setMatchOfDay(data?.[0] ?? null));
-    supabase.from("guests").select("*").order("created_at", { ascending: false }).then(({ data }) => setGuests(data ?? []));
-    supabase.from("images").select("*").order("created_at", { ascending: false }).then(({ data }) => setImages(data ?? []));
+    supabase.from("fotos_historicas").select("*").order("created_at", { ascending: false }).then(({ data }) => setFotosHistoricas(data ?? []));
+    supabase.from("fotos_2026").select("*").order("created_at", { ascending: false }).then(({ data }) => setFotos2026(data ?? []));
   }, []);
 
   const scroll = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -282,13 +287,49 @@ function Home() {
         </div>
       </section>
 
+      {/* Relatos Goles */}
+      <section id="notas" className="bg-secondary px-4 py-20 sm:py-24">
+        <div className="mx-auto max-w-4xl">
+          <SectionTitle eyebrow="Escuchá" title="Relatos de los Goles" />
+          <div className="mt-12 space-y-4">
+            {(relatos.length ? relatos : Array.from({ length: 3 }).map((_, i) => ({
+              id: `ph-${i}`, title: "Relatos próximamente", description: "Los relatos de los goles aparecerán aquí.", relato_url: "", published_at: null,
+            }) as Relato)).map((r) => (
+              <div key={r.id} className="rounded-xl border border-border bg-card p-6 shadow-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="font-display text-lg font-semibold text-primary">{r.title}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{r.description}</p>
+                  </div>
+                  <time className="shrink-0 text-xs uppercase tracking-widest text-muted-foreground">
+                    {r.published_at ? new Date(r.published_at).toLocaleDateString("es-AR") : "—"}
+                  </time>
+                </div>
+                {r.relato_url ? (
+                  <audio controls className="mt-4 w-full" src={r.relato_url} />
+                ) : (
+                  <div className="mt-4 h-12 rounded-md bg-secondary" />
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 text-center">
+            <Link to="/relatos">
+              <Button size="lg" className="bg-primary hover:bg-primary-bright font-display uppercase tracking-wider">
+                Escuchar más relatos <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Temporada 2026 */}
       <section id="temporada-2026" className="bg-secondary px-4 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
           <SectionTitle eyebrow="Nueva temporada" title="Temporada 2026" />
 
           <PaginatedGallery
-            items={images.map((img) => ({
+            items={fotos_2026.map((img) => ({
               id: img.id,
               image_url: img.url,
               name: "",
@@ -304,7 +345,7 @@ function Home() {
           <SectionTitle eyebrow="Revivilas" title="Fotos Históricas" />
 
           <PaginatedGallery
-            items={guests}
+            items={fotos_historicas}
             emptyText="Próximamente: fotos históricas del programa."
           />
         </div>

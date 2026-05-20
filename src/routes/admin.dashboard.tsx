@@ -14,7 +14,7 @@ export const Route = createFileRoute("/admin/dashboard")({
   component: Dashboard,
 });
 
-type Tab = "audios" | "matches" | "sponsors" | "guests" | "images";
+type Tab = "audios" | "relatos" | "matches" | "sponsors" | "fotos_historicas" | "fotos_2026";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -27,10 +27,11 @@ function Dashboard() {
 
   const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: "audios", label: "Notas", icon: Mic },
+    { id: "relatos", label: "Relatos", icon: Star },
     { id: "matches", label: "Partidos", icon: Tv },
     { id: "sponsors", label: "Sponsors", icon: Trophy },
-    { id: "guests", label: "Invitados", icon: Users },
-    { id: "images", label: "Imágenes", icon: ImgIcon },
+    { id: "fotos_historicas", label: "Fotos históricas", icon: Users },
+    { id: "fotos_2026", label: "Fotos 2026", icon: ImgIcon },
   ];
 
   return (
@@ -46,9 +47,8 @@ function Dashboard() {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex w-full items-center gap-3 rounded-lg px-4 py-2.5 font-display text-sm uppercase tracking-wider transition ${
-                tab === t.id ? "bg-gold text-gold-foreground" : "hover:bg-white/10"
-              }`}
+              className={`flex w-full items-center gap-3 rounded-lg px-4 py-2.5 font-display text-sm uppercase tracking-wider transition ${tab === t.id ? "bg-gold text-gold-foreground" : "hover:bg-white/10"
+                }`}
             >
               <t.icon className="h-4 w-4" /> {t.label}
             </button>
@@ -73,10 +73,11 @@ function Dashboard() {
 
       <main className="flex-1 p-6 pb-24 md:p-10">
         {tab === "audios" && <AudiosPanel />}
+        {tab === "relatos" && <RelatosPanel />}
         {tab === "matches" && <MatchesPanel />}
         {tab === "sponsors" && <SponsorsPanel />}
-        {tab === "guests" && <GuestsPanel />}
-        {tab === "images" && <ImagesPanel />}
+        {tab === "fotos_historicas" && <FotosHistoricasPanel />}
+        {tab === "fotos_2026" && <Fotos2026Panel />}
       </main>
     </div>
   );
@@ -204,6 +205,172 @@ function AudiosPanel() {
   );
 }
 
+/* ---------------- RELATOS ---------------- */
+type Relato = { id: string; title: string; description: string; relato_url: string; published_at: string | null; is_featured: boolean };
+type MatchOption = {
+  id: string
+  title: string
+}
+
+function RelatosPanel() {
+  const [items, setItems] = useState<Relato[]>([]);
+  const [editing, setEditing] = useState<Relato | null>(null);
+  const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const [matches, setMatches] = useState<MatchOption[]>([])
+  const [searchMatch, setSearchMatch] = useState("")
+  const [selectedMatch, setSelectedMatch] = useState<string | null>(null)
+
+  const load = async () => {
+    const { data } = await supabase.from("relatos_goles").select("*").order("created_at", { ascending: false });
+    setItems(data ?? []);
+  };
+  useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    loadMatches()
+  }, [])
+
+  const loadMatches = async () => {
+    const { data } = await supabase
+      .from("matches")
+      .select("id, title")
+      .order("match_date", { ascending: false })
+
+    setMatches(data ?? [])
+  }
+
+  const save = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setUploading(true);
+    try {
+      const fd = new FormData(e.currentTarget);
+      const file = fd.get("file") as File | null;
+      let relato_url = editing?.relato_url ?? "";
+      if (file && file.size > 0) {
+        const path = `${Date.now()}-${file.name}`;
+        const { error: upErr } = await supabase.storage.from("relatos").upload(path, file);
+        if (upErr) throw upErr;
+        relato_url = supabase.storage.from("relatos").getPublicUrl(path).data.publicUrl;
+      }
+      if (!relato_url) throw new Error("Subí un archivo MP3");
+
+      const payload = {
+        title: String(fd.get("title")),
+        description: String(fd.get("description")),
+        relato_url,
+        is_featured: fd.get("is_featured") === "on",
+        published_at: fd.get("published_at") ? new Date(String(fd.get("published_at"))).toISOString() : new Date().toISOString(),
+        partido_id: selectedMatch,
+      };
+      const { error } = editing
+        ? await supabase.from("relatos_goles").update(payload).eq("id", editing.id)
+        : await supabase.from("relatos_goles").insert(payload);
+      if (error) throw error;
+      toast.success("Relato guardado");
+      setOpen(false); setEditing(null); load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("¿Eliminar este relato?")) return;
+    const { error } = await supabase.from("relatos_goles").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Eliminado"); load();
+  };
+
+  const filteredMatches = matches.filter((m) =>
+    m.title.toLowerCase().includes(searchMatch.toLowerCase())
+  )
+
+  return (
+    <>
+      <PanelHeader title="Relatos" action={
+        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
+          <DialogTrigger asChild>
+            <Button onClick={() => setEditing(null)} className="bg-primary hover:bg-primary-bright">
+              <Plus className="mr-2 h-4 w-4" /> Nuevo relato
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>{editing ? "Editar relato" : "Nuevo relato"}</DialogTitle></DialogHeader>
+            <form onSubmit={save} className="space-y-4">
+              <div><Label>Título</Label><Input name="title" required defaultValue={editing?.title} /></div>
+              <div><Label>Descripción</Label><Textarea name="description" rows={4} defaultValue={editing?.description} /></div>
+              <div>
+                <Label>Archivo MP3 {editing && "(opcional, dejar vacío para mantener)"}</Label>
+                <Input name="file" type="file" accept="audio/*" required={!editing} />
+              </div>
+              <div>
+                <Label>Fecha</Label>
+                <Input type="datetime-local" name="published_at" defaultValue={editing?.published_at?.slice(0, 16) ?? new Date().toISOString().slice(0, 16)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Partido</Label>
+
+                <Input
+                  placeholder="Buscar partido..."
+                  value={searchMatch}
+                  onChange={(e) => setSearchMatch(e.target.value)}
+                />
+
+                <div className="max-h-48 overflow-y-auto rounded-md border">
+                  {filteredMatches.map((match) => (
+                    <button
+                      key={match.id}
+                      type="button"
+                      onClick={() => setSelectedMatch(match.id)}
+                      className={`w-full border-b p-3 text-left transition hover:bg-muted ${selectedMatch === match.id
+                          ? "bg-primary text-primary-foreground"
+                          : ""
+                        }`}
+                    >
+                      {match.title}
+                    </button>
+                  ))}
+
+                  {filteredMatches.length === 0 && (
+                    <div className="p-3 text-sm text-muted-foreground">
+                      No se encontraron partidos
+                    </div>
+                  )}
+                </div>
+              </div>
+              <DialogFooter><Button type="submit" disabled={uploading} className="bg-primary">{uploading ? "Subiendo…" : "Guardar"}</Button></DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      } />
+
+      <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+        <table className="w-full text-sm">
+          <thead className="bg-secondary text-left font-display uppercase tracking-wider text-xs text-muted-foreground">
+            <tr><th className="p-4">Título</th><th className="p-4">Fecha</th><th className="p-4 text-right">Acciones</th></tr>
+          </thead>
+          <tbody>
+            {items.length === 0 && <tr><td colSpan={3} className="p-8 text-center text-muted-foreground">Sin relatos todavía</td></tr>}
+            {items.map((r) => (
+              <tr key={r.id} className="border-t">
+                <td className="p-4 font-medium">{r.title} {r.is_featured && <span className="ml-2 rounded bg-gold/20 px-2 py-0.5 text-xs uppercase tracking-wider text-primary">En Hero</span>}</td>
+                <td className="p-4 text-muted-foreground">{r.published_at ? new Date(r.published_at).toLocaleDateString("es-AR") : "—"}</td>
+                <td className="p-4 text-right">
+                  <Button size="sm" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => remove(r.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
 /* ---------------- SPONSORS ---------------- */
 type Sponsor = { id: string; name: string; image_url: string; active: boolean };
 
@@ -286,15 +453,15 @@ function SponsorsPanel() {
   );
 }
 
-/* ---------------- IMAGES ---------------- */
+/* ---------------- FOTOS 2026 ---------------- */
 type Img = { id: string; url: string; filename: string };
 
-function ImagesPanel() {
+function Fotos2026Panel() {
   const [items, setItems] = useState<Img[]>([]);
   const [uploading, setUploading] = useState(false);
 
   const load = async () => {
-    const { data } = await supabase.from("images").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase.from("fotos_2026").select("*").order("created_at", { ascending: false });
     setItems(data ?? []);
   };
   useEffect(() => { load(); }, []);
@@ -305,10 +472,10 @@ function ImagesPanel() {
     setUploading(true);
     try {
       const path = `${Date.now()}-${file.name}`;
-      const { error: upErr } = await supabase.storage.from("images").upload(path, file);
+      const { error: upErr } = await supabase.storage.from("fotos_2026").upload(path, file);
       if (upErr) throw upErr;
-      const url = supabase.storage.from("images").getPublicUrl(path).data.publicUrl;
-      const { error } = await supabase.from("images").insert({ url, filename: file.name });
+      const url = supabase.storage.from("fotos_2026").getPublicUrl(path).data.publicUrl;
+      const { error } = await supabase.from("fotos_2026").insert({ url, filename: file.name });
       if (error) throw error;
       toast.success("Imagen subida"); load();
     } catch (err) {
@@ -322,9 +489,9 @@ function ImagesPanel() {
   const remove = async (i: Img) => {
     if (!confirm("¿Eliminar esta imagen?")) return;
     try {
-      const path = i.url.split("/images/")[1];
-      if (path) await supabase.storage.from("images").remove([path]);
-      const { error } = await supabase.from("images").delete().eq("id", i.id);
+      const path = i.url.split("/fotos_2026/")[1];
+      if (path) await supabase.storage.from("fotos_2026").remove([path]);
+      const { error } = await supabase.from("fotos_2026").delete().eq("id", i.id);
       if (error) throw error;
       toast.success("Eliminada"); load();
     } catch (err) {
@@ -334,7 +501,7 @@ function ImagesPanel() {
 
   return (
     <>
-      <PanelHeader title="Imágenes" action={
+      <PanelHeader title="Fotos 2026" action={
         <label className="inline-flex cursor-pointer items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-bright">
           <Plus className="h-4 w-4" /> {uploading ? "Subiendo…" : "Subir imagen"}
           <input type="file" accept="image/*" className="hidden" onChange={upload} disabled={uploading} />
@@ -342,7 +509,7 @@ function ImagesPanel() {
       } />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        {items.length === 0 && <p className="col-span-full text-center text-muted-foreground py-12">Sin imágenes todavía</p>}
+        {items.length === 0 && <p className="col-span-full text-center text-muted-foreground py-12">Sin fotos del 2026 todavía</p>}
         {items.map((i) => (
           <div key={i.id} className="group relative overflow-hidden rounded-xl border bg-card shadow-sm">
             <img src={i.url} alt={i.filename} className="aspect-square w-full object-cover" />
@@ -498,16 +665,16 @@ function MatchesPanel() {
   );
 }
 
-/* ---------------- GUESTS (Invitados) ---------------- */
+/* ---------------- Fotos históricas ---------------- */
 type Guest = { id: string; name: string; image_url: string };
 
-function GuestsPanel() {
+function FotosHistoricasPanel() {
   const [items, setItems] = useState<Guest[]>([]);
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   const load = async () => {
-    const { data } = await supabase.from("guests").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase.from("fotos_historicas").select("*").order("created_at", { ascending: false });
     setItems(data ?? []);
   };
   useEffect(() => { load(); }, []);
@@ -520,10 +687,10 @@ function GuestsPanel() {
       const file = fd.get("file") as File;
       if (!file || file.size === 0) throw new Error("Seleccioná una foto");
       const path = `${Date.now()}-${file.name}`;
-      const { error: upErr } = await supabase.storage.from("guests").upload(path, file);
+      const { error: upErr } = await supabase.storage.from("fotos_historicas").upload(path, file);
       if (upErr) throw upErr;
-      const url = supabase.storage.from("guests").getPublicUrl(path).data.publicUrl;
-      const { error } = await supabase.from("guests").insert({ name: String(fd.get("name") ?? ""), image_url: url });
+      const url = supabase.storage.from("fotos_historicas").getPublicUrl(path).data.publicUrl;
+      const { error } = await supabase.from("fotos_historicas").insert({ name: String(fd.get("name") ?? ""), image_url: url });
       if (error) throw error;
       toast.success("Invitado agregado");
       setOpen(false); load();
@@ -537,9 +704,9 @@ function GuestsPanel() {
   const remove = async (g: Guest) => {
     if (!confirm("¿Eliminar esta foto?")) return;
     try {
-      const path = g.image_url.split("/guests/")[1];
-      if (path) await supabase.storage.from("guests").remove([path]);
-      const { error } = await supabase.from("guests").delete().eq("id", g.id);
+      const path = g.image_url.split("/fotos_historicas/")[1];
+      if (path) await supabase.storage.from("fotos_historicas").remove([path]);
+      const { error } = await supabase.from("fotos_historicas").delete().eq("id", g.id);
       if (error) throw error;
       toast.success("Eliminada"); load();
     } catch (err) {
@@ -549,13 +716,13 @@ function GuestsPanel() {
 
   return (
     <>
-      <PanelHeader title="Invitados (Fotos)" action={
+      <PanelHeader title="Fotos históricas" action={
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary-bright"><Plus className="mr-2 h-4 w-4" /> Agregar foto</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>Nueva foto de invitado</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Nueva foto histórica</DialogTitle></DialogHeader>
             <form onSubmit={save} className="space-y-4">
               <div><Label>Nombre</Label><Input name="name" placeholder="Opcional" /></div>
               <div><Label>Foto</Label><Input name="file" type="file" accept="image/*" required /></div>
@@ -566,7 +733,7 @@ function GuestsPanel() {
       } />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        {items.length === 0 && <p className="col-span-full text-center text-muted-foreground py-12">Sin invitados todavía</p>}
+        {items.length === 0 && <p className="col-span-full text-center text-muted-foreground py-12">Sin fotos todavía</p>}
         {items.map((g) => (
           <div key={g.id} className="group relative overflow-hidden rounded-xl border bg-card shadow-sm">
             <img src={g.image_url} alt={g.name} className="aspect-square w-full object-cover" />
