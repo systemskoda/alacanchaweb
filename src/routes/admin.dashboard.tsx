@@ -687,9 +687,9 @@ function FotosHistoricasPanel() {
       const file = fd.get("file") as File;
       if (!file || file.size === 0) throw new Error("Seleccioná una foto");
       const path = `${Date.now()}-${file.name}`;
-      const { error: upErr } = await supabase.storage.from("fotos_historicas").upload(path, file);
+      const { error: upErr } = await supabase.storage.from("guests").upload(path, file);
       if (upErr) throw upErr;
-      const url = supabase.storage.from("fotos_historicas").getPublicUrl(path).data.publicUrl;
+      const url = supabase.storage.from("guests").getPublicUrl(path).data.publicUrl;
       const { error } = await supabase.from("fotos_historicas").insert({ name: String(fd.get("name") ?? ""), image_url: url });
       if (error) throw error;
       toast.success("Invitado agregado");
@@ -704,8 +704,8 @@ function FotosHistoricasPanel() {
   const remove = async (g: Guest) => {
     if (!confirm("¿Eliminar esta foto?")) return;
     try {
-      const path = g.image_url.split("/fotos_historicas/")[1];
-      if (path) await supabase.storage.from("fotos_historicas").remove([path]);
+      const path = g.image_url.split("/guests/")[1];
+      if (path) await supabase.storage.from("guests").remove([path]);
       const { error } = await supabase.from("fotos_historicas").delete().eq("id", g.id);
       if (error) throw error;
       toast.success("Eliminada"); load();
