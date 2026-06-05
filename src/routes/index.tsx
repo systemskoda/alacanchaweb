@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import mundialImage from "../assets/a-la-cancha-mundial.jpeg";
 import { Radio, Calendar, Mic, Trophy, Instagram, Facebook, MapPin, Clock, Globe, ArrowRight, Twitch, Youtube, Tv, ChevronLeft, ChevronRight } from "lucide-react";
 
 type GalleryItem = {
@@ -152,7 +153,7 @@ function Home() {
 
               <div className="mt-4 overflow-hidden rounded-xl">
                 <img
-                  src="src/assets/a-la-cancha-mundial.jpeg"
+                  src={mundialImage}
                   alt="Argentina vs Honduras"
                   className="w-full aspect-video object-cover rounded-xl"
                 />
