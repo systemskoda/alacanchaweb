@@ -63,6 +63,7 @@ function Home() {
   const [matchOfDay, setMatchOfDay] = useState<Match | null>(null);
   const [fotos_historicas, setFotosHistoricas] = useState<Guest[]>([]);
   const [fotos_2026, setFotos2026] = useState<Image[]>([]);
+  const [worldCupFeature, setWorldCupFeature] = useState<WorldCupFeature | null>(null);
 
   useEffect(() => {
     supabase.from("audios").select("*").order("published_at", { ascending: false }).limit(3).then(({ data }) => {
@@ -84,9 +85,138 @@ function Home() {
     supabase.from("matches").select("*").eq("is_match_of_day", true).order("created_at", { ascending: false }).limit(1).then(({ data }) => setMatchOfDay(data?.[0] ?? null));
     supabase.from("fotos_historicas").select("*").order("created_at", { ascending: false }).then(({ data }) => setFotosHistoricas(data ?? []));
     supabase.from("fotos_2026").select("*").order("created_at", { ascending: false }).then(({ data }) => setFotos2026(data ?? []));
+    supabase.from("world_cup_featured").select("*").eq("is_active", true).limit(1).then(({ data }) => { setWorldCupFeature(data?.[0] ?? null); });
   }, []);
 
   const scroll = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+
+  type WorldCupFeaturedProps = {
+    title: string;
+    description?: string | null;
+    imageUrl?: string | null;
+    videoUrl?: string | null;
+    youtubeUrl?: string | null;
+    displayType: string;
+  };
+
+  type WorldCupFeature = {
+    id: string;
+    title: string;
+    description: string | null;
+    image_url: string | null;
+    video_url: string | null;
+    youtube_url: string | null;
+    display_type: string;
+    is_active: boolean;
+  };
+
+  function WorldCupFeatured({
+    title,
+    description,
+    imageUrl,
+    videoUrl,
+    youtubeUrl,
+    displayType,
+  }: WorldCupFeaturedProps) {
+    const getYoutubeId = (url: string) => {
+      const match = url.match(
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?]+)/
+      );
+
+      return match?.[1];
+    };
+
+    const youtubeId = youtubeUrl
+      ? getYoutubeId(youtubeUrl)
+      : null;
+
+    return (
+      <section
+        id="mundial-fifa"
+        className="bg-secondary px-4 py-20 sm:py-24"
+      >
+        <div className="mx-auto max-w-6xl">
+          <SectionTitle
+            eyebrow="Especial Mundial"
+            title="Mundial FIFA 2026 - USA, CANADÁ y MÉXICO"
+          />
+
+          <div className="mt-12 grid grid-cols-1 lg:grid-cols-[65%_35%] gap-8">
+
+            {/* Análisis */}
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-xl h-fit">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-gold">
+                <Trophy className="h-3.5 w-3.5" />
+                El análisis
+              </div>
+
+              <div className="mt-4 overflow-hidden rounded-xl">
+                <img
+                  src="src/assets/a-la-cancha-mundial.jpeg"
+                  alt="Argentina vs Honduras"
+                  className="w-full aspect-video object-cover rounded-xl"
+                />
+              </div>
+
+              <h3 className="mt-4 text-center font-display text-2xl font-bold text-primary">
+                Copa Mundial de la FIFA 2026
+              </h3>
+
+              <p className="mt-2 text-center text-muted-foreground">
+                Todas las noticias, el análisis de los partidos, entrevistas exclusivas y la pasión del fútbol mundial, con el toque único de A la Cancha.
+              </p>
+            </div>
+
+            {/* Mundial FIFA */}
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-xl h-fit">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-gold">
+                <Trophy className="h-3.5 w-3.5" />
+                Mundial FIFA 2026
+              </div>
+
+              <div className="mt-4 overflow-hidden rounded-xl bg-black/5">
+                {displayType === "image" && imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt={title}
+                    className="w-full object-contain"
+                  />
+                )}
+
+                {displayType === "video" && videoUrl && (
+                  <video
+                    controls
+                    className="w-full"
+                  >
+                    <source src={videoUrl} />
+                  </video>
+                )}
+
+                {displayType === "youtube" && youtubeId && (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${youtubeId}`}
+                    className="aspect-video w-full"
+                    allowFullScreen
+                  />
+                )}
+              </div>
+
+              <h3 className="mt-4 text-center font-display text-2xl font-bold text-primary">
+                {title}
+              </h3>
+
+              {description && (
+                <p className="mt-2 text-center text-muted-foreground">
+                  {description}
+                </p>
+              )}
+            </div>
+
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -170,7 +300,7 @@ function Home() {
             {matchOfDay ? (
               <>
                 {matchOfDay.cover_image_url ? (
-                  <div className="mt-3 overflow-hidden rounded-xl bg-white/5">
+                  <div className="mt-4 mx-auto w-full max-w-md overflow-hidden rounded-xl bg-black/5">
                     <img
                       src={matchOfDay.cover_image_url}
                       alt={matchOfDay.title}
@@ -207,6 +337,18 @@ function Home() {
           </div>
         </div>
       </section>
+
+      {/* Mundial FIFA */}
+      {worldCupFeature && (
+        <WorldCupFeatured
+          title={worldCupFeature.title}
+          description={worldCupFeature.description}
+          imageUrl={worldCupFeature.image_url}
+          videoUrl={worldCupFeature.video_url}
+          youtubeUrl={worldCupFeature.youtube_url}
+          displayType={worldCupFeature.display_type}
+        />
+      )}
 
       {/* Sponsors */}
       <section id="sponsors" className="px-4 py-16 sm:py-20">

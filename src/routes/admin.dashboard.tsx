@@ -14,7 +14,7 @@ export const Route = createFileRoute("/admin/dashboard")({
   component: Dashboard,
 });
 
-type Tab = "audios" | "relatos" | "matches" | "sponsors" | "fotos_historicas" | "fotos_2026";
+type Tab = "audios" | "relatos" | "matches" | "sponsors" | "fotos_historicas" | "fotos_2026" | "mundial";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -32,6 +32,7 @@ function Dashboard() {
     { id: "sponsors", label: "Sponsors", icon: Trophy },
     { id: "fotos_historicas", label: "Fotos históricas", icon: Users },
     { id: "fotos_2026", label: "Fotos 2026", icon: ImgIcon },
+    { id: "mundial", label: "Mundial FIFA", icon: Trophy },
   ];
 
   return (
@@ -78,6 +79,7 @@ function Dashboard() {
         {tab === "sponsors" && <SponsorsPanel />}
         {tab === "fotos_historicas" && <FotosHistoricasPanel />}
         {tab === "fotos_2026" && <Fotos2026Panel />}
+        {tab === "mundial" && <WorldCupPanel />}
       </main>
     </div>
   );
@@ -326,8 +328,8 @@ function RelatosPanel() {
                       type="button"
                       onClick={() => setSelectedMatch(match.id)}
                       className={`w-full border-b p-3 text-left transition hover:bg-muted ${selectedMatch === match.id
-                          ? "bg-primary text-primary-foreground"
-                          : ""
+                        ? "bg-primary text-primary-foreground"
+                        : ""
                         }`}
                     >
                       {match.title}
@@ -744,6 +746,274 @@ function FotosHistoricasPanel() {
           </div>
         ))}
       </div>
+    </>
+  );
+}
+
+/* ---------------- MUNDIAL FIFA ---------------- */
+
+type WorldCupFeature = {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  video_url: string | null;
+  youtube_url: string | null;
+  display_type: string;
+};
+
+function WorldCupPanel() {
+  const [item, setItem] = useState<WorldCupFeature | null>(null);
+  const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const load = async () => {
+    const { data } = await supabase
+      .from("world_cup_featured")
+      .select("*")
+      .limit(1)
+      .maybeSingle();
+
+    setItem(data);
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const save = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setUploading(true);
+
+    try {
+      const fd = new FormData(e.currentTarget);
+
+      const title = String(fd.get("title") ?? "");
+      const description = String(fd.get("description") ?? "");
+      const display_type = String(fd.get("display_type"));
+
+      let image_url: string | null = null;
+      let video_url: string | null = null;
+      let youtube_url: string | null = null;
+
+      const file = fd.get("file") as File | null;
+
+      if (display_type === "image") {
+        if (!file || file.size === 0) {
+          throw new Error("Seleccioná una imagen");
+        }
+
+        const path = `${Date.now()}-${file.name}`;
+
+        const { error: upErr } = await supabase.storage
+          .from("world_cup")
+          .upload(path, file);
+
+        if (upErr) throw upErr;
+
+        image_url = supabase.storage
+          .from("world_cup")
+          .getPublicUrl(path).data.publicUrl;
+      }
+
+      if (display_type === "video") {
+        if (!file || file.size === 0) {
+          throw new Error("Seleccioná un video");
+        }
+
+        const path = `${Date.now()}-${file.name}`;
+
+        const { error: upErr } = await supabase.storage
+          .from("world_cup")
+          .upload(path, file);
+
+        if (upErr) throw upErr;
+
+        video_url = supabase.storage
+          .from("world_cup")
+          .getPublicUrl(path).data.publicUrl;
+      }
+
+      if (display_type === "youtube") {
+        youtube_url = String(fd.get("youtube_url") ?? "");
+      }
+
+      const payload = {
+        title,
+        description,
+        display_type,
+        image_url,
+        video_url,
+        youtube_url,
+        is_active: true,
+      };
+
+      const { data: existing } = await supabase
+        .from("world_cup_featured")
+        .select("id")
+        .limit(1)
+        .maybeSingle();
+
+      const { error } = existing
+        ? await supabase
+          .from("world_cup_featured")
+          .update(payload)
+          .eq("id", existing.id)
+        : await supabase
+          .from("world_cup_featured")
+          .insert(payload);
+
+      if (error) throw error;
+
+      toast.success("Contenido actualizado");
+
+      setOpen(false);
+      load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const getYoutubeEmbedUrl = (url: string) => {
+    const match = url.match(
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/,
+    );
+
+    return match
+      ? `https://www.youtube.com/embed/${match[1]}`
+      : "";
+  };
+
+  return (
+    <>
+      <PanelHeader
+        title="Mundial FIFA"
+        action={
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-primary hover:bg-primary-bright">
+                <Plus className="mr-2 h-4 w-4" />
+                Editar contenido
+              </Button>
+            </DialogTrigger>
+
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Contenido Mundial FIFA</DialogTitle>
+              </DialogHeader>
+
+              <form onSubmit={save} className="space-y-4">
+                <div>
+                  <Label>Título</Label>
+                  <Input
+                    name="title"
+                    defaultValue={item?.title ?? ""}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label>Descripción</Label>
+                  <Textarea
+                    name="description"
+                    defaultValue={item?.description ?? ""}
+                  />
+                </div>
+
+                <div>
+                  <Label>Tipo</Label>
+                  <select
+                    name="display_type"
+                    defaultValue={item?.display_type ?? "image"}
+                    className="w-full rounded-md border bg-background px-3 py-2"
+                  >
+                    <option value="image">Imagen</option>
+                    <option value="video">Video</option>
+                    <option value="youtube">YouTube</option>
+                  </select>
+                </div>
+
+                <div>
+                  <Label>Archivo</Label>
+                  <Input
+                    name="file"
+                    type="file"
+                    accept="image/*,video/*"
+                  />
+                </div>
+
+                <div>
+                  <Label>URL YouTube</Label>
+                  <Input
+                    name="youtube_url"
+                    defaultValue={item?.youtube_url ?? ""}
+                    placeholder="https://youtube.com/watch?v=..."
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={uploading}
+                  className="w-full"
+                >
+                  {uploading ? "Guardando..." : "Guardar"}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        }
+      />
+
+      {!item ? (
+        <p className="py-12 text-center text-muted-foreground">
+          No hay contenido configurado.
+        </p>
+      ) : (
+        <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+          {item.display_type === "image" && item.image_url && (
+            <img
+              src={item.image_url}
+              alt={item.title}
+              className="w-full max-h-[500px] object-cover"
+            />
+          )}
+
+          {item.display_type === "video" && item.video_url && (
+            <video
+              controls
+              className="w-full max-h-[500px]"
+            >
+              <source src={item.video_url} />
+            </video>
+          )}
+
+          {item.display_type === "youtube" &&
+            item.youtube_url && (
+              <div className="aspect-video">
+                <iframe
+                  src={getYoutubeEmbedUrl(item.youtube_url)}
+                  title={item.title}
+                  className="h-full w-full"
+                  allowFullScreen
+                />
+              </div>
+            )}
+
+          <div className="p-4">
+            <h3 className="font-semibold text-lg">
+              {item.title}
+            </h3>
+
+            {item.description && (
+              <p className="mt-2 text-sm text-muted-foreground">
+                {item.description}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }

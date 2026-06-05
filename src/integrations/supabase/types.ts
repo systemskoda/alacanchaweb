@@ -187,6 +187,42 @@ export type Database = {
         }
         Relationships: []
       }
+      world_cup_featured: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          image_url: string | null
+          video_url: string | null
+          youtube_url: string | null
+          display_type: string
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          image_url?: string | null
+          video_url?: string | null
+          youtube_url?: string | null
+          display_type?: string
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          image_url?: string | null
+          video_url?: string | null
+          youtube_url?: string | null
+          display_type?: string
+          is_active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
