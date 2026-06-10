@@ -79,9 +79,33 @@ function Home() {
         });
       }
     });
-    supabase.from("relatos_goles").select("*").order("published_at", { ascending: false }).limit(3).then(({ data }) => {
-      setRelatos(data ?? []);
-    });
+    // supabase.from("relatos_goles").select("*").order("published_at", { ascending: false }).limit(3).then(({ data }) => {
+    //   setRelatos(data ?? []);
+    // });
+    (async () => {
+      const now = new Date().toISOString();
+
+      const { data: ultimoPartido } = await supabase
+        .from("matches")
+        .select("id")
+        .lte("match_date", now)
+        .order("match_date", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (!ultimoPartido) {
+        setRelatos([]);
+        return;
+      }
+
+      const { data: relatos } = await supabase
+        .from("relatos_goles")
+        .select("*")
+        .eq("partido_id", ultimoPartido.id)
+        .order("published_at", { ascending: true });
+
+      setRelatos(relatos ?? []);
+    })();
     supabase.from("sponsors").select("*").eq("active", true).order("created_at", { ascending: false }).then(({ data }) => setSponsors(data ?? []));
     supabase.from("matches").select("*").eq("is_match_of_day", true).order("created_at", { ascending: false }).limit(1).then(({ data }) => setMatchOfDay(data?.[0] ?? null));
     supabase.from("fotos_historicas").select("*").order("created_at", { ascending: false }).then(({ data }) => setFotosHistoricas(data ?? []));
@@ -351,6 +375,51 @@ function Home() {
         />
       )}
 
+      {/* PRODE Y SORTEOS */}
+      {/* <section className="px-4 py-20">
+        <div className="mx-auto w-full overflow-hidden rounded-3xl bg-gradient-to-r from-primary to-primary-bright p-10 shadow-2xl">
+          <div className="text-center">
+            <div className="mb-4 text-6xl">🏆</div>
+
+            <p className="font-display text-sm uppercase tracking-[0.3em] text-white/80">
+              Mundial FIFA 2026
+            </p>
+
+            <h2 className="mt-2 font-display text-4xl font-bold text-white md:text-5xl">
+              Pronosticá el resultado y ganá premios
+            </h2>
+
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-white/90">
+              Participá del sorteo dejando tu pronóstico para el próximo partido del Mundial.
+              Si acertás el resultado, podés convertirte en uno de los ganadores.
+            </p>
+
+            <div className="mt-8 rounded-2xl bg-white/10 p-6 backdrop-blur-sm">
+              <p className="font-display text-2xl font-bold text-white">
+                🇦🇷 Argentina vs Brasil 🇧🇷
+              </p>
+
+              <p className="mt-2 text-white/80">
+                Tenés tiempo para participar hasta el inicio del partido.
+              </p>
+            </div>
+
+            <a
+              href="PEGA_AQUI_LA_URL_DE_TU_FORMULARIO"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-8 inline-flex items-center rounded-xl bg-white px-10 py-4 font-display text-lg font-bold text-primary transition duration-200 hover:scale-105"
+            >
+              ⚽ PARTICIPAR AHORA
+            </a>
+
+            <p className="mt-4 text-sm text-white/70">
+              Completá el formulario y dejá tu pronóstico.
+            </p>
+          </div>
+        </div>
+      </section> */}
+
       {/* Sponsors */}
       <section id="sponsors" className="px-4 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl">
@@ -432,9 +501,9 @@ function Home() {
 
       {/* Relatos Goles */}
       <section id="notas" className="bg-secondary px-4 py-20 sm:py-24">
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-6xl">
           <SectionTitle eyebrow="Escuchá" title="Relatos de los Goles" />
-          <div className="mt-12 space-y-4">
+          <div className="mt-12 grid gap-4 md:grid-cols-2">
             {(relatos.length ? relatos : Array.from({ length: 3 }).map((_, i) => ({
               id: `ph-${i}`, title: "Relatos próximamente", description: "Los relatos de los goles aparecerán aquí.", relato_url: "", published_at: null,
             }) as Relato)).map((r) => (
